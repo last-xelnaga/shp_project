@@ -1,0 +1,22 @@
+# Google API dashboard
+https://console.developers.google.com/apis/dashboard?project=shp-server&duration=P4D
+
+# Firebase console
+https://console.firebase.google.com/project/shp-server/settings/general/android:com.xelnaga.shp.client
+
+# server
+https://github.com/firebase/quickstart-python/tree/master/messaging 
+https://github.com/firebase/quickstart-android/tree/master/messaging
+https://developers.google.com/api-client-library/python/
+
+# messaging
+https://firebase.google.com/docs/cloud-messaging/server
+https://firebase.google.com/docs/cloud-messaging/auth-server
+https://firebase.google.com/docs/cloud-messaging/send-message
+https://firebase.google.com/docs/cloud-messaging/android/client
+
+# oauth
+https://developers.google.com/identity/protocols/OAuth2InstalledApp
+https://developers.google.com/identity/protocols/OAuth2
+https://google.github.io/google-api-cpp-client/latest/guide/oauth2.html
+https://github.com/googlesamples/oauth-apps-for-windows/tree/master/OAuthConsoleApp
