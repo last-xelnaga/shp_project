@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "891087898326",
+    "firebase_url": "https://shp-server.firebaseio.com",
+    "project_id": "shp-server",
+    "storage_bucket": "shp-server.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:891087898326:android:d3bb7069b4b51788",
+        "android_client_info": {
+          "package_name": "com.xelnaga.shp.client"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "891087898326-okbvj5dfnu3tor6p9orjegmsj8ssla6q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCQ-e0Q06XLoeoUIZCL3At_eJYLmr_Wv0k"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
