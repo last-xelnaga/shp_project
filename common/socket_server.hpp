@@ -15,7 +15,7 @@ public:
     private:
         int accept_fd;
         server_routine p_routine;
-        
+
         //pthread_t thread;
         unsigned int write_timeout;
         unsigned int read_timeout;
@@ -40,6 +40,15 @@ public:
                 void);
     };
 
+private:
+    enum socket_state
+    {
+        //ready_to_create,
+        ready_to_bind,
+        ready_to_accept,
+        ready_to_close
+    };
+
 
 private:
     int socket_fd;
@@ -47,23 +56,36 @@ private:
 
     long listener;
     //server_client_class* client_class;
-    volatile bool terminated;
+    //volatile bool terminated;
+
+    socket_state state;
+    unsigned int mi_port_number;
+    server_routine mp_func;
 
 private:
     int bind_on_server (
-            const unsigned int port_number);
+            void);
 
     static void* task1 (
             void* p_huj);
 
+    int bind_and_listen (
+            void);
+
     int accept_client (
-            int* accept_fd);
+            void);
+
+    int add_client_to_list (
+            int accept_fd);
+
+    int remove_finished (
+            void);
 
 public:
     server_socket_class (
             void);
 
-    int bind_and_listen (
+    int start (
             unsigned int port_number,
             server_routine p_func);
 

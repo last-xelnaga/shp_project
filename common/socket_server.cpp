@@ -110,20 +110,41 @@ server_socket_class::server_client_class::~server_client_class (
 
 
 
-struct __attribute__((__packed__)) huj_t
+/*struct __attribute__((__packed__)) huj_t
 {
     server_socket_class* p_server;
     server_socket_class::server_routine p_func;
-};
+    //unsigned int port;
+};*/
 
 
 void* server_socket_class::task1 (
     void* p_huj)
 {
-    struct huj_t* p_real_huj = (struct huj_t*)p_huj;
-    server_socket_class* p_server = p_real_huj->p_server;
+    //struct huj_t* p_real_huj = (struct huj_t*)p_huj;
+    server_socket_class* p_server = (server_socket_class*)p_huj;//p_real_huj->p_server;
 
-    do
+    char is_time_close = 0;
+
+    do {
+        switch (p_server->state)
+        {
+            //case ready_to_create:
+            //    break;
+            case ready_to_bind:
+                p_server->bind_and_listen ();
+                break;
+            case ready_to_accept:
+                p_server->accept_client ();
+                break;
+            case ready_to_close:
+                is_time_close = 1;
+                break;
+        }
+    } while (!is_time_close);
+
+
+    /*do
     {
         printf ("start the accept loop\n");
 
@@ -137,14 +158,14 @@ void* server_socket_class::task1 (
         server_client_class* p_client = new server_client_class (p_real_huj->p_func, accept_fd);
         p_client->run ();
 
-    } while (1);
+    } while (1);*/
 
     printf ("end the accept loop\n");
     return NULL;
 }
 
 int server_socket_class::bind_on_server (
-        const unsigned int port_number)
+        void)
 {
     int result = 0;
     struct sockaddr_in socket_address;
@@ -173,7 +194,7 @@ int server_socket_class::bind_on_server (
     {
         socket_address.sin_family = AF_INET;
         socket_address.sin_addr.s_addr = htonl (INADDR_ANY);
-        socket_address.sin_port = htons (port_number);
+        socket_address.sin_port = htons (mi_port_number);
     }
 
     if (result == 0)
@@ -207,14 +228,44 @@ server_socket_class::server_socket_class (
 {
     socket_fd = -1;
     listen_queue = 5;
-    terminated = false;
+    //terminated = false;
+
+    state = ready_to_bind;
+    mi_port_number = 0;
 }
 
-static struct huj_t huj;
+//static struct huj_t huj;
 
-int server_socket_class::bind_and_listen (
+int server_socket_class::start (
         unsigned int port_number,
         server_routine p_func)
+{
+    int result = 0;
+
+    if (state != ready_to_bind)
+    {
+        printf ("invalid socket state\n");
+        result = -1;
+    }
+
+mi_port_number = port_number;
+mp_func = p_func;
+
+    // make a clean up if needed
+    if (result == 0)
+    {
+        //huj.p_server = this;
+        //huj.p_func = p_func;
+        //huj.port = port_number;
+        pthread_create ((pthread_t*)&listener, NULL, task1, (void*)this/*&huj*/);
+    }
+
+    return result;
+}
+
+int server_socket_class::bind_and_listen (
+        /*unsigned int port_number,
+        server_routine p_func*/void)
 {
     int result = 0;
     //DEBUG_LOG_TRACE_BEGIN
@@ -232,40 +283,38 @@ int server_socket_class::bind_and_listen (
 
     if (result == 0)
     {
-        result = bind_on_server (port_number);
+        result = bind_on_server ();
+        if (result == 0)
+        {
+            state = ready_to_accept;
+        }
+        else
+        {
+            // make a clean up if needed
+            close (socket_fd);
+            socket_fd = -1;
+        }
     }
 
-    // make a clean up if needed
-    if (result != 0)
-    {
-        //close_socket (socket_fd);
-        if (socket_fd >= 0)
-            close (socket_fd);
-        socket_fd = -1;
-    }
-    else
-    {
-        huj.p_server = this;
-        huj.p_func = p_func;
-        pthread_create ((pthread_t*)&listener, NULL, task1, (void*)&huj);
-    }
+
 
     //DEBUG_LOG_TRACE_END (result)
     return result;
 }
 
 int server_socket_class::accept_client (
-        int* accept_fd)
+/*int* accept_fd*/void)
 {
     int result = 0;
+        int accept_fd = -1;
     //DEBUG_LOG_TRACE_BEGIN
 
-    if (socket_fd < 0)
-    {
+    //if (socket_fd < 0)
+    //{
         //DEBUG_LOG_MESSAGE ("socket is not ready");
-        printf ("socket is not ready\n");
-        result = -1;//RESULT_INVALID_STATE;
-    }
+    //    printf ("socket is not ready\n");
+    //    result = -1;//RESULT_INVALID_STATE;
+    //}
 
     // set blocking mode
     if (result == 0)
@@ -275,8 +324,8 @@ int server_socket_class::accept_client (
 
     if (result == 0)
     {
-        *accept_fd = accept (socket_fd, NULL, NULL);
-        if (*accept_fd < 0)
+        accept_fd = accept (socket_fd, NULL, NULL);
+        if (accept_fd < 0)
         {
             //DEBUG_LOG_MESSAGE ("accept call failed: %s", strerror (errno));
             printf ("accept call failed: %s\n", strerror (errno));
@@ -284,17 +333,36 @@ int server_socket_class::accept_client (
         }
     }
 
-    if (terminated)
-        return -1;
-
     // set non-blocking mode
     if (result == 0)
     {
         result = set_blocking (socket_fd, true);
     }
 
+    if (result == 0)
+    {
+        add_client_to_list (accept_fd);
+    }
+
     //DEBUG_LOG_TRACE_END (result)
     return result;
+}
+
+int server_socket_class::add_client_to_list (
+        int accept_fd)
+{
+    printf ("register new client\n");
+
+    server_client_class* p_client = new server_client_class (mp_func, accept_fd);
+    p_client->run ();
+
+    return 0;
+}
+
+int server_socket_class::remove_finished (
+        void)
+{
+return 0;
 }
 
 void server_socket_class::terminate (
@@ -302,13 +370,13 @@ void server_socket_class::terminate (
 {
     //DEBUG_LOG_TRACE_BEGIN
 
-    terminated = true;
-    //set_blocking (socket_fd, false);
+    state = ready_to_close;
 
     printf ("waiting for join\n");
     shutdown (socket_fd, 0);
     pthread_join(listener, NULL);
     printf ("joined\n");
+    listener = -1;
 
     if (socket_fd >= 0)
     {

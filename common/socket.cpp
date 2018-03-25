@@ -2,142 +2,10 @@
 #include "socket.hpp"
 //#include "debug.hpp"
 
-//#include <netdb.h>
-#include <unistd.h>
-//#include <errno.h>
-#include <string.h>
 #include <fcntl.h>
-#include <netinet/in.h>
+#include <string.h>
+#include <sys/socket.h>
 
-
-/*int create_socket (
-        int* fd)
-{
-    int result = 0;
-    int socket_fd = -1;
-    //DEBUG_LOG_TRACE_BEGIN
-
-    if (result == 0)
-    {
-        socket_fd = socket (AF_INET, SOCK_STREAM, IPPROTO_IP);
-        if (socket_fd < 0)
-        {
-            //DEBUG_LOG_MESSAGE ("socket call failed: %s", strerror (errno));
-            result = -1;
-        }
-    }
-
-    if (result == 0)
-    {
-        *fd = socket_fd;
-    }
-
-    //DEBUG_LOG_TRACE_END (result)
-    return result;
-}*/
-
-/*int connect_to_server (
-        const int fd,
-        const char* p_server_name,
-        const unsigned int port_number)
-{
-    int result = 0;
-    struct hostent* p_host = NULL;
-    struct sockaddr_in socket_address;
-    //DEBUG_LOG_TRACE_BEGIN
-
-    if (fd < 0)
-    {
-        //DEBUG_LOG_MESSAGE ("invalid socket param");
-        result = -1;
-    }
-
-    if (result == 0)
-    {
-        p_host = gethostbyname (p_server_name);
-        if (p_host == NULL)
-        {
-            //DEBUG_LOG_MESSAGE ("gethostbyname call failed: %s", strerror (errno));
-            result = -1; //RESULT_SOCKET_ERROR;
-        }
-    }
-
-    if (result == 0)
-    {
-        memcpy ((char*)&socket_address.sin_addr, p_host->h_addr, p_host->h_length);
-        socket_address.sin_family = AF_INET;
-        socket_address.sin_port = htons (port_number);
-    }
-
-    if (result == 0)
-    {
-        int res = connect (fd, (struct sockaddr*)&socket_address, sizeof (sockaddr_in));
-        if (res < 0)
-        {
-            //DEBUG_LOG_MESSAGE ("connect call failed: %s", strerror (errno));
-            result = -1;
-        }
-    }
-
-    //DEBUG_LOG_TRACE_END (result)
-    return result;
-}*/
-
-/*int bind_on_server (
-        const int fd,
-        const unsigned int port_number)
-{
-    int result = 0;
-    struct sockaddr_in socket_address;
-    //DEBUG_LOG_TRACE_BEGIN
-
-    if (fd < 0)
-    {
-        //DEBUG_LOG_MESSAGE ("invalid socket param");
-        result = -1;
-    }
-
-    if (result == 0)
-    {
-        int flag = 1;
-        int res = setsockopt (fd, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof (flag));
-        if (res < 0)
-        {
-            //DEBUG_LOG_MESSAGE ("setsockopt call failed: %s", strerror (errno));
-            result = -1;
-        }
-    }
-
-    if (result == 0)
-    {
-        socket_address.sin_family = AF_INET;
-        socket_address.sin_addr.s_addr = htonl (INADDR_ANY);
-        socket_address.sin_port = htons (port_number);
-    }
-
-    if (result == 0)
-    {
-        int res = bind (fd, (struct sockaddr *) &socket_address, sizeof (struct sockaddr_in));
-        if (res < 0)
-        {
-            //DEBUG_LOG_MESSAGE ("bind call failed: %s", strerror (errno));
-            result = -1;
-        }
-    }
-
-    if (result == 0)
-    {
-        int res = listen (fd, 1);
-        if (res < 0)
-        {
-            //DEBUG_LOG_MESSAGE ("listen call failed: %s", strerror (errno));
-            result = -1;
-        }
-    }
-
-    //DEBUG_LOG_TRACE_END (result)
-    return result;
-}*/
 
 int set_blocking (
         const int fd,
@@ -189,33 +57,6 @@ int set_blocking (
     //DEBUG_LOG_TRACE_END (result)
     return result;
 }
-
-/*int accept (
-        const int fd,
-        int* accept_fd)
-{
-    int result = 0;
-    int client_fd = -1;
-    //DEBUG_LOG_TRACE_BEGIN
-
-    if (result == 0)
-    {
-        client_fd = accept (fd, NULL, NULL);
-        if (client_fd < 0)
-        {
-            //DEBUG_LOG_MESSAGE ("accept call failed: %s", strerror (errno));
-            result = -1;
-        }
-    }
-
-    if (result == 0)
-    {
-        *accept_fd = client_fd;
-    }
-
-    //DEBUG_LOG_TRACE_END (result)
-    return result;
-}*/
 
 int send_data (
         const int fd,
@@ -343,16 +184,3 @@ int recv_data (
     //DEBUG_LOG_TRACE_END (result)
     return result;
 }
-
-/*void close_socket (
-        const int fd)
-{
-    //DEBUG_LOG_TRACE_BEGIN
-
-    if (fd >= 0)
-    {
-        close (fd);
-    }
-
-    //DEBUG_LOG_TRACE_END (0)
-}*/

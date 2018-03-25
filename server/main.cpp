@@ -30,7 +30,7 @@ int main (
 {
     server_socket_class server_socket;
     server_socket_class::server_routine p_func = &server_worker;
-    server_socket.bind_and_listen (5000, p_func);
+    server_socket.start (5000, p_func);
 
     sleep (3);
     printf ("press q to exit\n");

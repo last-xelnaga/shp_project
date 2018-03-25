@@ -5,7 +5,7 @@
 int send_notification (
     void)
 {
-    int status = system("python messaging.py huj pizda");
+    int status = 1; //system("python messaging.py huj pizda");
     printf ("system result %d\n", status);
 
     return 0;
