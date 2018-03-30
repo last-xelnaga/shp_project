@@ -1,10 +1,9 @@
 
-#include "socket_server.hpp"
+#include "server_socket_class.hpp"
+#include "fcm_messaging_class.hpp"
 #include <stdio.h>
 #include <unistd.h>
 
-int send_notification (
-    void);
 
 void server_worker (
     server_socket_class::server_client_class* p_client)
@@ -18,11 +17,14 @@ void server_worker (
     {
         printf ("%s\n", buffer);
 
-        send_notification ();
+        fcm_messaging_class::get_instance ().register_message ("test_title", "test_body");
 
         char answer [] = "huj";
         p_client->send_message ((unsigned char*)answer, 4);
     }
+    
+    if (buffer)
+        delete buffer;
 }
 
 int main (
@@ -32,7 +34,7 @@ int main (
     server_socket_class::server_routine p_func = &server_worker;
     server_socket.start (5000, p_func);
 
-    sleep (3);
+    sleep (1);
     printf ("press q to exit\n");
     do
     {

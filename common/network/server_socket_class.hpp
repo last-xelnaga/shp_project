@@ -15,7 +15,6 @@ public:
     private:
         int accept_fd;
         server_routine p_routine;
-
         //pthread_t thread;
         unsigned int write_timeout;
         unsigned int read_timeout;
@@ -55,9 +54,7 @@ private:
     unsigned int listen_queue;
 
     long listener;
-    //server_client_class* client_class;
-    //volatile bool terminated;
-
+    server_client_class* client_class;
     socket_state state;
     unsigned int mi_port_number;
     server_routine mp_func;

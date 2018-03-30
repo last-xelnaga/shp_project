@@ -1,3 +1,5 @@
 obj/
-shp_server
+access_token
+priv_key.pem
 service-account.json
+shp_server

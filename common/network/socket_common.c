@@ -1,15 +1,14 @@
 
-#include "socket.hpp"
-//#include "debug.hpp"
-
+#include "socket_common.h"
 #include <fcntl.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 
 
 int set_blocking (
         const int fd,
-        const bool is_blocking)
+        const int is_blocking)
 {
     int result = 0;
     int new_flags = -1;
@@ -37,7 +36,7 @@ int set_blocking (
     if (result == 0)
     {
         new_flags = flags | O_NONBLOCK;
-        if (is_blocking == false)
+        if (is_blocking == 0)
         {
             new_flags = flags & ~O_NONBLOCK;
         }

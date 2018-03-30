@@ -1,0 +1,10 @@
+
+INC += \
+    -I../common/utils
+
+SRCC += \
+    base64.c \
+    sha256.c
+
+VPATH += \
+    src:../common/utils

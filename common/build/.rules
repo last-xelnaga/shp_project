@@ -1,0 +1,36 @@
+
+OBJDIR = ./obj
+
+C  = $(PREFIX)gcc
+CC = $(PREFIX)g++
+
+CFLAGS   = $(FLAGS) -DDEBUG_TAG="$(TARGET)" -Wall -Wextra -std=c99
+CXXFLAGS = $(FLAGS) -DDEBUG_TAG="$(TARGET)" -Wall -Wextra -std=c++0x
+
+
+OBJC = $(SRCC:%.c=$(OBJDIR)/%.o)
+
+$(OBJDIR)/%.o :%.c
+	$(C) -c $(CFLAGS) $(INC) $< -o $@
+
+
+OBJCPP = $(SRCCPP:%.cpp=$(OBJDIR)/%.o)
+
+$(OBJDIR)/%.o :%.cpp
+	$(CC) -c $(CXXFLAGS) $(INC) $< -o $@
+
+.PHONY: all clean profile
+
+all: $(TARGET)
+
+$(OBJDIR):
+	mkdir -p $(OBJDIR)
+
+$(TARGET): $(OBJDIR) $(OBJCPP) $(OBJC)
+	$(CC) -o $@ $(OBJCPP) $(OBJC) $(LIB)
+
+clean:
+	rm -rf $(OBJDIR) $(TARGET)
+
+profile: $(TARGET)
+	valgrind --leak-check=full --show-leak-kinds=all ./$(TARGET)

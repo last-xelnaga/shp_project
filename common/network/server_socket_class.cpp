@@ -1,16 +1,10 @@
 
-#include "socket_server.hpp"
-#include "socket.hpp"
-//#include "message.hpp"
-//#include "debug.hpp"
-
+#include "server_socket_class.hpp"
+#include "socket_common.h"
 #include <unistd.h>
-//#include <netdb.h>
-//#include <unistd.h>
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
-//#include <fcntl.h>
 #include <netinet/in.h>
 #include <pthread.h>
 
@@ -105,24 +99,10 @@ server_socket_class::server_client_class::~server_client_class (
     accept_fd = -1;
 }
 
-
-
-
-
-
-/*struct __attribute__((__packed__)) huj_t
-{
-    server_socket_class* p_server;
-    server_socket_class::server_routine p_func;
-    //unsigned int port;
-};*/
-
-
 void* server_socket_class::task1 (
-    void* p_huj)
+        void* p_huj)
 {
-    //struct huj_t* p_real_huj = (struct huj_t*)p_huj;
-    server_socket_class* p_server = (server_socket_class*)p_huj;//p_real_huj->p_server;
+    server_socket_class* p_server = (server_socket_class*)p_huj;
 
     char is_time_close = 0;
 
@@ -142,23 +122,6 @@ void* server_socket_class::task1 (
                 break;
         }
     } while (!is_time_close);
-
-
-    /*do
-    {
-        printf ("start the accept loop\n");
-
-        int accept_fd = -1;
-        p_server->accept_client (&accept_fd);
-
-        if (accept_fd < 0)
-            break;
-
-        printf ("register new client\n");
-        server_client_class* p_client = new server_client_class (p_real_huj->p_func, accept_fd);
-        p_client->run ();
-
-    } while (1);*/
 
     printf ("end the accept loop\n");
     return NULL;
@@ -228,13 +191,11 @@ server_socket_class::server_socket_class (
 {
     socket_fd = -1;
     listen_queue = 5;
-    //terminated = false;
-
     state = ready_to_bind;
     mi_port_number = 0;
-}
 
-//static struct huj_t huj;
+    client_class = nullptr;
+}
 
 int server_socket_class::start (
         unsigned int port_number,
@@ -254,10 +215,7 @@ mp_func = p_func;
     // make a clean up if needed
     if (result == 0)
     {
-        //huj.p_server = this;
-        //huj.p_func = p_func;
-        //huj.port = port_number;
-        pthread_create ((pthread_t*)&listener, NULL, task1, (void*)this/*&huj*/);
+        pthread_create ((pthread_t*)&listener, NULL, task1, (void*)this);
     }
 
     return result;
@@ -296,25 +254,16 @@ int server_socket_class::bind_and_listen (
         }
     }
 
-
-
     //DEBUG_LOG_TRACE_END (result)
     return result;
 }
 
 int server_socket_class::accept_client (
-/*int* accept_fd*/void)
+        void)
 {
     int result = 0;
-        int accept_fd = -1;
+    int accept_fd = -1;
     //DEBUG_LOG_TRACE_BEGIN
-
-    //if (socket_fd < 0)
-    //{
-        //DEBUG_LOG_MESSAGE ("socket is not ready");
-    //    printf ("socket is not ready\n");
-    //    result = -1;//RESULT_INVALID_STATE;
-    //}
 
     // set blocking mode
     if (result == 0)
@@ -353,8 +302,10 @@ int server_socket_class::add_client_to_list (
 {
     printf ("register new client\n");
 
-    server_client_class* p_client = new server_client_class (mp_func, accept_fd);
-    p_client->run ();
+    remove_finished ();
+
+    client_class = new server_client_class (mp_func, accept_fd);
+    client_class->run ();
 
     return 0;
 }
@@ -362,7 +313,10 @@ int server_socket_class::add_client_to_list (
 int server_socket_class::remove_finished (
         void)
 {
-return 0;
+    if (client_class != nullptr)
+        delete client_class;
+
+    return 0;
 }
 
 void server_socket_class::terminate (
@@ -383,6 +337,8 @@ void server_socket_class::terminate (
         close (socket_fd);
     }
     socket_fd = -1;
+
+    remove_finished ();
 
     //DEBUG_LOG_TRACE_END (0)
 }

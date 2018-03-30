@@ -2,10 +2,6 @@
 #ifndef SOCKET_CLIENT_HPP
 #define SOCKET_CLIENT_HPP
 
-#include "socket.hpp"
-
-
-class message_class;
 
 class client_socket_class
 {

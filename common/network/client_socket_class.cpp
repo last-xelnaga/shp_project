@@ -1,14 +1,12 @@
 
-#include "socket_client.hpp"
+#include "client_socket_class.hpp"
+#include "socket_common.h"
 //#include "message.hpp"
 //#include "debug.hpp"
 
 #include <unistd.h>
 #include <netdb.h>
-//#include <stdio.h>
-//#include <errno.h>
 #include <string.h>
-//#include <fcntl.h>
 #include <netinet/in.h>
 
 
