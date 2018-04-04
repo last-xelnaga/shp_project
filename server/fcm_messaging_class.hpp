@@ -11,6 +11,7 @@ private:
     std::string m_body;
     std::string m_token_reply;
     std::string m_fcm_reply;
+    std::string m_jwt;
 
 public:
     static fcm_messaging_class& get_instance (
@@ -21,6 +22,9 @@ public:
     }
 private:
     fcm_messaging_class (
+            void);
+
+    int prepare_jwt (
             void);
 
     int request_new_access_token (
@@ -38,7 +42,6 @@ private:
 
     int get_access_token_from_cache (
             void);
-
 
     // send message routines
     int send_message (
