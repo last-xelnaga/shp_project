@@ -11,18 +11,16 @@ char* base64_encode (
         unsigned int input_length,
         unsigned int* output_length);
 
+// replace + with -, / with _ and drop = characters
+char* base64url_encode (
+        const unsigned char* data,
+        unsigned int input_length,
+        unsigned int* output_length);
+
 unsigned char* base64_decode (
         const char* data,
         unsigned int input_length,
         unsigned int* output_length);
-
-void base64_cleanup (
-        void);
-
-// replace + with -, / with _ and drop = characters
-void convert_to_base64url (
-        char* data,
-        unsigned int* input_length);
 
 #ifdef __cplusplus
 }

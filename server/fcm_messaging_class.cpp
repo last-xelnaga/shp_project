@@ -32,8 +32,7 @@ int fcm_messaging_class::prepare_jwt (
     if (result == 0)
     {
         const char header_str [] =  "{\"alg\":\"RS256\",\"typ\":\"JWT\"}";
-        char* header = base64_encode ((unsigned char*)header_str, strlen (header_str), &base64_length);
-        convert_to_base64url (header, &base64_length);
+        char* header = base64url_encode ((unsigned char*)header_str, strlen (header_str), &base64_length);
 
         // append the header to the jws data
         m_jwt += header;
@@ -54,8 +53,7 @@ int fcm_messaging_class::prepare_jwt (
                 "{\"iss\":\"%s\",\"scope\":\"https://www.googleapis.com/auth/firebase.messaging\",\
                 \"aud\":\"https://www.googleapis.com/oauth2/v4/token\",\"exp\":%ld,\"iat\":%ld}",
                 "firebase-adminsdk-9n8jv@shp-server.iam.gserviceaccount.com", exp_time, curr_time);
-        char* claim = base64_encode ((unsigned char*)message, strlen (message), &base64_length);
-        convert_to_base64url (claim, &base64_length);
+        char* claim = base64url_encode ((unsigned char*)message, strlen (message), &base64_length);
 
         // append the claim to the jws data
         m_jwt += claim;
@@ -100,8 +98,7 @@ int fcm_messaging_class::prepare_jwt (
         if (RSA_sign (NID_sha256, digest, SHA256_RESULT_LEN, sign_buffer, &sign_len, rsakey) == 1)
         {
             // get base64 url encoded signature
-            char* signature = base64_encode (sign_buffer, sign_len, &base64_length);
-            convert_to_base64url (signature, &base64_length);
+            char* signature = base64url_encode (sign_buffer, sign_len, &base64_length);
 
             // update jws data with signature
             m_jwt += ".";
@@ -124,7 +121,6 @@ int fcm_messaging_class::prepare_jwt (
     // clean up
     RSA_free (rsakey);
     EVP_PKEY_free (privkey);
-    base64_cleanup ();
 
     return result;
 }

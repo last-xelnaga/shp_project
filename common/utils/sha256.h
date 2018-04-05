@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-int sha256 (
+void sha256 (
         const unsigned char* p_src,
         const unsigned int i_src_len,
         unsigned char* p_res);
