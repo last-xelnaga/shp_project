@@ -13,6 +13,7 @@ SRCCPP := \
     main.cpp
 
 # sources
+include ../common/log/.rules
 include ../common/network/.rules
 
 # global rules

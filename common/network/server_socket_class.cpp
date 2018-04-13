@@ -1,12 +1,12 @@
 
+#include "log.h"
 #include "server_socket_class.hpp"
 #include "socket_common.h"
-#include <unistd.h>
+
 #include <errno.h>
-#include <stdio.h>
-#include <string.h>
 #include <netinet/in.h>
 #include <pthread.h>
+#include <unistd.h>
 
 
 server_socket_class::server_client_class::server_client_class (
@@ -31,8 +31,6 @@ int server_socket_class::server_client_class::recv_message (
         unsigned int* size)
 {
     int result = 0;
-    //message_class::message_header_t header;
-    //DEBUG_LOG_TRACE_BEGIN
 
     if (result == 0)
     {
@@ -41,21 +39,17 @@ int server_socket_class::server_client_class::recv_message (
 
     if (result == 0)
     {
-        *buffer /*[]*/ = new unsigned char (*size);
+        *buffer = new unsigned char (*size);
     }
 
     if (result == 0)
     {
-        //unsigned char* p_data = NULL;
-        //unsigned int data_length = 0;
-        //(*p_message)->get_payload (&p_data, &data_length);
         if (*size)
         {
             result = recv_data (accept_fd, *buffer, *size, read_timeout);
         }
     }
 
-    //DEBUG_LOG_TRACE_END (result)
     return result;
 }
 
@@ -64,28 +58,19 @@ int server_socket_class::server_client_class::send_message (
         const unsigned int size)
 {
     int result = 0;
-    //DEBUG_LOG_TRACE_BEGIN
 
     if (result == 0)
     {
         unsigned char* p_data = (unsigned char*)&size;
         unsigned int data_length = sizeof (int);
-        //p_message->get_header (&p_data, &data_length);
         result = send_data (accept_fd, p_data, data_length, write_timeout);
     }
 
     if (result == 0)
     {
-        //unsigned char* p_data = NULL;
-        //unsigned int data_length = 0;
-        //p_message->get_payload (&p_data, &data_length);
-        //if (data_length)
-        //{
-            result = send_data (accept_fd, p_buffer, size, write_timeout);
-        //}
+        result = send_data (accept_fd, p_buffer, size, write_timeout);
     }
 
-    //DEBUG_LOG_TRACE_END (result)
     return result;
 }
 
@@ -109,8 +94,6 @@ void* server_socket_class::task1 (
     do {
         switch (p_server->state)
         {
-            //case ready_to_create:
-            //    break;
             case ready_to_bind:
                 p_server->bind_and_listen ();
                 break;
@@ -123,7 +106,7 @@ void* server_socket_class::task1 (
         }
     } while (!is_time_close);
 
-    printf ("end the accept loop\n");
+    DEBUG_LOG_INFO ("end the accept loop");
     return NULL;
 }
 
@@ -132,12 +115,10 @@ int server_socket_class::bind_on_server (
 {
     int result = 0;
     struct sockaddr_in socket_address;
-    //DEBUG_LOG_TRACE_BEGIN
 
     if (socket_fd < 0)
     {
-        //DEBUG_LOG_MESSAGE ("invalid socket param");
-        printf ("invalid socket param\n");
+        DEBUG_LOG_ERROR ("invalid socket param");
         result = -1;
     }
 
@@ -147,8 +128,7 @@ int server_socket_class::bind_on_server (
         int res = setsockopt (socket_fd, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof (flag));
         if (res < 0)
         {
-            //DEBUG_LOG_MESSAGE ("setsockopt call failed: %s", strerror (errno));
-            printf ("setsockopt call failed: %s\n", strerror (errno));
+            DEBUG_LOG_ERROR ("setsockopt call failed: %s", strerror (errno));
             result = -1;
         }
     }
@@ -165,8 +145,7 @@ int server_socket_class::bind_on_server (
         int res = bind (socket_fd, (struct sockaddr *) &socket_address, sizeof (struct sockaddr_in));
         if (res < 0)
         {
-            //DEBUG_LOG_MESSAGE ("bind call failed: %s", strerror (errno));
-            printf ("bind call failed: %s\n", strerror (errno));
+            DEBUG_LOG_ERROR ("bind call failed: %s", strerror (errno));
             result = -1;
         }
     }
@@ -176,13 +155,11 @@ int server_socket_class::bind_on_server (
         int res = listen (socket_fd, listen_queue);
         if (res < 0)
         {
-            //DEBUG_LOG_MESSAGE ("listen call failed: %s", strerror (errno));
-            printf ("listen call failed: %s\n", strerror (errno));
+            DEBUG_LOG_ERROR ("listen call failed: %s", strerror (errno));
             result = -1;
         }
     }
 
-    //DEBUG_LOG_TRACE_END (result)
     return result;
 }
 
@@ -205,7 +182,7 @@ int server_socket_class::start (
 
     if (state != ready_to_bind)
     {
-        printf ("invalid socket state\n");
+        DEBUG_LOG_ERROR ("invalid socket state");
         result = -1;
     }
 
@@ -222,19 +199,16 @@ mp_func = p_func;
 }
 
 int server_socket_class::bind_and_listen (
-        /*unsigned int port_number,
-        server_routine p_func*/void)
+        void)
 {
     int result = 0;
-    //DEBUG_LOG_TRACE_BEGIN
 
     if (result == 0)
     {
         socket_fd = socket (AF_INET, SOCK_STREAM, IPPROTO_IP);
         if (socket_fd < 0)
         {
-            //DEBUG_LOG_MESSAGE ("socket call failed: %s", strerror (errno));
-            printf ("socket call failed: %s\n", strerror (errno));
+            DEBUG_LOG_ERROR ("socket call failed: %s", strerror (errno));
             result = -1;
         }
     }
@@ -254,7 +228,6 @@ int server_socket_class::bind_and_listen (
         }
     }
 
-    //DEBUG_LOG_TRACE_END (result)
     return result;
 }
 
@@ -263,7 +236,6 @@ int server_socket_class::accept_client (
 {
     int result = 0;
     int accept_fd = -1;
-    //DEBUG_LOG_TRACE_BEGIN
 
     // set blocking mode
     if (result == 0)
@@ -276,8 +248,7 @@ int server_socket_class::accept_client (
         accept_fd = accept (socket_fd, NULL, NULL);
         if (accept_fd < 0)
         {
-            //DEBUG_LOG_MESSAGE ("accept call failed: %s", strerror (errno));
-            printf ("accept call failed: %s\n", strerror (errno));
+            DEBUG_LOG_ERROR ("accept call failed: %s", strerror (errno));
             result = -1;
         }
     }
@@ -293,14 +264,13 @@ int server_socket_class::accept_client (
         add_client_to_list (accept_fd);
     }
 
-    //DEBUG_LOG_TRACE_END (result)
     return result;
 }
 
 int server_socket_class::add_client_to_list (
         int accept_fd)
 {
-    printf ("register new client\n");
+    DEBUG_LOG_INFO ("register new client");
 
     remove_finished ();
 
@@ -322,14 +292,12 @@ int server_socket_class::remove_finished (
 void server_socket_class::terminate (
         void)
 {
-    //DEBUG_LOG_TRACE_BEGIN
-
     state = ready_to_close;
 
-    printf ("waiting for join\n");
+    DEBUG_LOG_INFO ("waiting for join");
     shutdown (socket_fd, 0);
     pthread_join(listener, NULL);
-    printf ("joined\n");
+    DEBUG_LOG_INFO ("joined");
     listener = -1;
 
     if (socket_fd >= 0)
@@ -339,17 +307,11 @@ void server_socket_class::terminate (
     socket_fd = -1;
 
     remove_finished ();
-
-    //DEBUG_LOG_TRACE_END (0)
 }
 
 server_socket_class::~server_socket_class (
         void)
 {
-    //DEBUG_LOG_TRACE_BEGIN
-
     if (socket_fd >= 0)
         server_socket_class::terminate ();
-
-    //DEBUG_LOG_TRACE_END (0)
 }

@@ -14,6 +14,7 @@ SRCCPP := \
     fcm_messaging_class.cpp
 
 # sources
+include ../common/log/.rules
 include ../common/network/.rules
 include ../common/utils/.rules
 

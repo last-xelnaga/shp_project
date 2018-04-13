@@ -1,11 +1,13 @@
 
 //https://en.wikipedia.org/wiki/SHA-2
 
-#include <string.h>
 #include "sha256.h"
+
+#include <string.h>
 
 #define ROL(x, k) ((x << k) | (x >> (32 - k)))
 #define ROR(x, k) ((x >> k) | (x << (32 - k)))
+
 
 // first 32 bits of the fractional parts of the square roots of the first 8 primes 2..19
 static const unsigned int h [8] =

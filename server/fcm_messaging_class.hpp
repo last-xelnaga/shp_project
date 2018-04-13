@@ -1,7 +1,8 @@
 
+//https://stackoverflow.com/questions/1008019/c-singleton-design-pattern
+
 #include <string>
 
-//https://stackoverflow.com/questions/1008019/c-singleton-design-pattern
 
 class fcm_messaging_class
 {
