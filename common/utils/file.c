@@ -1,5 +1,6 @@
 
 #include "file.h"
+#include "log.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -58,10 +59,9 @@ void drop_old_file (
     if (stat (file_name, &buffer) == 0)
     {
         time_t now = time (NULL);
-        //printf ("now %ld, file %ld, diff %ld\n", now, buffer.st_ctime, now - buffer.st_ctime);
         if (now > buffer.st_ctime + exp_time)
         {
-            printf ("file %s is old\n", file_name);
+            DEBUG_LOG_INFO ("file %s is old", file_name);
             unlink (file_name);
         }
     }
@@ -75,7 +75,7 @@ int does_file_exist (
     struct stat buffer;   
     if (stat (file_name, &buffer) != 0)
     {
-        printf ("file %s does not exist\n", file_name);
+        DEBUG_LOG_ERROR ("file %s does not exist", file_name);
         result = 0;
     }
 

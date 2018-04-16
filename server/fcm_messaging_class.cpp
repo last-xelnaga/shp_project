@@ -8,6 +8,8 @@
 #include "log.h"
 #include "sha256.h"
 
+#include <fstream>
+#include <cpp-json/json.h>
 #include <curl/curl.h>
 #include <openssl/pem.h>
 
@@ -17,6 +19,59 @@ fcm_messaging_class::fcm_messaging_class (
         void)
 {
 
+}
+
+int fcm_messaging_class::parse_service_account_json (
+        void)
+{
+    int result = 0;
+    m_email = "";
+    m_pem_private_key = "";
+    json::value obj;
+
+    // open teh json file
+    if (result == 0)
+    {
+        std::ifstream file ("service-account.json");
+        if (file)
+            obj = json::parse (file);
+        else
+        {
+            DEBUG_LOG_ERROR ("failed to open service-account.json");
+            result = -1;
+        }
+    }
+
+    // extract the email address
+    if (result == 0)
+    {
+        json::value email = obj ["client_email"];
+        m_email = stringify (email, json::ESCAPE_UNICODE);
+    }
+
+    // extract the private key
+    if (result == 0)
+    {
+        json::value key = obj ["private_key"];
+        m_pem_private_key = stringify (key, json::ESCAPE_UNICODE);
+
+        // get the first occurrence of endl
+        size_t pos = m_pem_private_key.find ("\\n");
+ 
+        // and remove them all
+        while (pos != std::string::npos)
+        {
+            // Replace this occurrence of Sub String
+            m_pem_private_key.replace (pos, 2, "\n");
+            // Get the next occurrence from the current position
+            pos = m_pem_private_key.find ("\\n", pos + 2);
+        }
+
+        // remove quotes
+        m_pem_private_key = m_pem_private_key.substr (1, m_pem_private_key.size() - 2);
+    }
+
+    return result;
 }
 
 int fcm_messaging_class::prepare_jwt (
@@ -48,9 +103,9 @@ int fcm_messaging_class::prepare_jwt (
         char message [1024];
         memset (message, 0, sizeof (message));
         snprintf (message,  sizeof (message) - 1,
-                "{\"iss\":\"%s\",\"scope\":\"https://www.googleapis.com/auth/firebase.messaging\",\
+                "{\"iss\":%s,\"scope\":\"https://www.googleapis.com/auth/firebase.messaging\",\
                 \"aud\":\"https://www.googleapis.com/oauth2/v4/token\",\"exp\":%ld,\"iat\":%ld}",
-                "firebase-adminsdk-9n8jv@shp-server.iam.gserviceaccount.com", exp_time, curr_time);
+                m_email.c_str () /*"firebase-adminsdk-9n8jv@shp-server.iam.gserviceaccount.com"*/, exp_time, curr_time);
         char* claim = base64url_encode ((unsigned char*)message, strlen (message), &base64_length);
 
         // append the claim to the jws data
@@ -58,25 +113,23 @@ int fcm_messaging_class::prepare_jwt (
         free (claim);
     }
 
-    // load the certificate
-    EVP_PKEY* privkey = NULL;
+    // get a BIO
+    BIO* bio = NULL;
     if (result == 0)
     {
-        privkey = EVP_PKEY_new ();
-        FILE* f = fopen ("priv_key.pem", "rb");
-        if (!PEM_read_PrivateKey (f, &privkey, NULL, NULL))
+        bio = BIO_new_mem_buf ((char*)m_pem_private_key.c_str (), -1);
+        if (bio == NULL)
         {
-            DEBUG_LOG_ERROR ("failed to load certificate");
+            DEBUG_LOG_ERROR ("BIO_new_mem_buf failed\n");
             result = -1;
         }
-        fclose (f);
     }
 
-    // and extract the private key
+    // load the certificate
     RSA* rsakey = NULL;
     if (result == 0)
     {
-        rsakey = EVP_PKEY_get1_RSA (privkey);
+        rsakey = PEM_read_bio_RSAPrivateKey (bio, NULL, 0, NULL);
         if (!RSA_check_key (rsakey))
         {
             DEBUG_LOG_ERROR ("failed to validate RSA key");
@@ -108,7 +161,7 @@ int fcm_messaging_class::prepare_jwt (
             DEBUG_LOG_ERROR ("failed to sigh jwt data");
             result = -1;
         }
-        
+
         free (sign_buffer);
     }
 
@@ -117,8 +170,11 @@ int fcm_messaging_class::prepare_jwt (
     m_jwt = grand_type_str + m_jwt;
 
     // clean up
-    RSA_free (rsakey);
-    EVP_PKEY_free (privkey);
+    if (rsakey)
+        RSA_free (rsakey);
+
+    if (bio)
+        BIO_free(bio);
 
     return result;
 }
@@ -159,6 +215,16 @@ int fcm_messaging_class::request_new_access_token (
         if (res != CURLE_OK)
         {
             DEBUG_LOG_ERROR ("failed to set HEADER: %s", curl_easy_strerror (res));
+            result = -1;
+        }
+    }
+
+    // prepare the jwt full string
+    if (result == 0)
+    {
+        if (parse_service_account_json () != 0)
+        {
+            DEBUG_LOG_ERROR ("parse_service_account_json failed");
             result = -1;
         }
     }

@@ -1,4 +1,4 @@
 
 $(OBJDIR)/base64.o: base64.h .rules
-$(OBJDIR)/file.o: file.h .rules
+$(OBJDIR)/file.o: file.h log.h .rules
 $(OBJDIR)/sha256.o: sha256.h .rules

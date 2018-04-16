@@ -7,22 +7,23 @@
 class fcm_messaging_class
 {
 private:
-    std::string m_access_token;
     std::string m_title;
     std::string m_body;
+
+    std::string m_access_token;
     std::string m_token_reply;
     std::string m_fcm_reply;
+
     std::string m_jwt;
 
-public:
-    static fcm_messaging_class& get_instance (
-            void)
-    {
-        static fcm_messaging_class instance;
-        return instance;
-    }
+    std::string m_email;
+    std::string m_pem_private_key;
+
 private:
     fcm_messaging_class (
+            void);
+
+    int parse_service_account_json (
             void);
 
     int prepare_jwt (
@@ -59,11 +60,17 @@ private:
             const unsigned int length);
 
 public:
-    fcm_messaging_class (fcm_messaging_class const&) = delete;
-    void operator=(fcm_messaging_class const&) = delete;
+    static fcm_messaging_class& get_instance (
+            void)
+    {
+        static fcm_messaging_class instance;
+        return instance;
+    }
 
     void register_message (
-        std::string title,
-        std::string body);
+            std::string title,
+            std::string body);
 
+    fcm_messaging_class (fcm_messaging_class const&) = delete;
+    void operator=(fcm_messaging_class const&) = delete;
 };

@@ -7,7 +7,7 @@ FLAGS = -O0 -g -ggdb
 #CFLAGS	+= -O2 -fno-omit-frame-pointer
 
 OBJDIR = $(shell pwd)/obj
-INC = -I.
+INC = -I. -I./../external/cpp-json/include
 LIB = -lcurl -lssl -lcrypto
 
 SRCCPP := \
