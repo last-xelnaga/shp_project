@@ -1,6 +1,4 @@
 
-OBJDIR = ./obj
-
 C  = $(PREFIX)gcc
 CC = $(PREFIX)g++
 
@@ -21,12 +19,12 @@ $(OBJDIR)/%.o :%.cpp
 
 .PHONY: all clean profile
 
-all: $(TARGET)
+all: $(OBJDIR) $(TARGET)
 
 $(OBJDIR):
-	mkdir -p $(OBJDIR)
+	mkdir -vp $(OBJDIR)
 
-$(TARGET): $(OBJDIR) $(OBJCPP) $(OBJC)
+$(TARGET): $(OBJCPP) $(OBJC)
 	$(CC) -o $@ $(OBJCPP) $(OBJC) $(LIB)
 
 clean:

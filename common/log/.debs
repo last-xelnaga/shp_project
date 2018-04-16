@@ -1,0 +1,2 @@
+
+$(OBJDIR)/log.o: log.h .rules

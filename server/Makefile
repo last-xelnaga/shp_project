@@ -6,6 +6,7 @@ TARGET = shp_server
 FLAGS = -O0 -g -ggdb
 #CFLAGS	+= -O2 -fno-omit-frame-pointer
 
+OBJDIR = $(shell pwd)/obj
 INC = -I.
 LIB = -lcurl -lssl -lcrypto
 
@@ -20,3 +21,10 @@ include ../common/utils/.rules
 
 # global rules
 include ../common/build/.rules
+
+# dependencies
+include ../common/log/.debs
+include ../common/network/.debs
+include ../common/utils/.debs
+$(OBJDIR)/main.o: log.h fcm_messaging_class.hpp server_socket_class.hpp Makefile
+$(OBJDIR)/fcm_messaging_class.o: base64.h fcm_messaging_class.hpp file.h log.h sha256.h Makefile

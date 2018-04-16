@@ -6,6 +6,7 @@ PREFIX	=
 TARGET  = shp_client
 FLAGS = -O0 -g -ggdb
 
+OBJDIR = $(shell pwd)/obj
 INC = -I.
 LIB = 
 
@@ -18,3 +19,8 @@ include ../common/network/.rules
 
 # global rules
 include ../common/build/.rules
+
+# dependencies
+include ../common/log/.debs
+include ../common/network/.debs
+$(OBJDIR)/main.o: log.h client_socket_class.hpp Makefile

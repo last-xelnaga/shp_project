@@ -1,0 +1,4 @@
+
+$(OBJDIR)/client_socket_class.o: client_socket_class.hpp log.h socket_common.h .rules
+$(OBJDIR)/server_socket_class.o: log.h server_socket_class.hpp socket_common.h .rules
+$(OBJDIR)/socket_common.o: log.h socket_common.h .rules
