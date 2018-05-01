@@ -1,27 +1,115 @@
 
+#include "network_manager_class.hpp"
 #include "log.h"
-#include "client_socket_class.hpp"
+#include "sensors.h"
+#include <string>
+#include <time.h>
+#include <unistd.h>
 
+
+bool is_time_for_watering (
+        void)
+{
+    return false;
+}
+
+void do_watering (
+        void)
+{
+    /*{
+        "test3" : {
+            "x" : 123.456
+        },
+        "test4" : [
+            1,
+            2,
+            3,
+            {
+                "z" : 12345
+            }
+        ],
+        "test1" : "hello world",
+        "test2" : "BLAH\uD840\uDC8ABLAH"
+    }*/
+
+    std::string message = "{\n";
+    message += "  time : " + std::to_string (time (NULL)) + ",\n";
+
+    message += "  \"watering\" : {\n";
+
+    // get water level before watering
+    int limit = get_liquid_level ();
+    message += "    \"limit\" : " + std::to_string (limit) + ",\n";
+
+    if (limit > 1)
+    {
+        // start the pump
+        if (water_pump_start () == 0)
+        {
+            // wait enough for the 100 ml
+            //sleep (90);
+
+            // stop the pump
+            water_pump_stop ();
+
+            message += "    \"status\" : \"OK\"\n";
+        }
+        else
+        {
+            message += "    \"status\" : \"failed to start pump\"\n";
+        }
+    }
+    else
+    {
+        message += "    \"status\" : \"water level too low\"\n";
+    }
+    message += "  }\n}\n";
+
+    printf ("%s\n", message.c_str ());
+
+    // send the message
+    //network_manager_class::get_instance().enqueue_message ();
+}
+
+bool is_time_for_temperature (
+        void)
+{
+    return false;
+}
+
+void do_temperature_check (
+        void)
+{
+    // get the current temperature
+    get_temperature ();
+
+    // and humidity
+    get_humidity ();
+
+    // send the message
+    network_manager_class::get_instance().enqueue_message ();
+}
 
 int main (
-    void)
+        void)
 {
-    client_socket_class socket_client;
-    socket_client.connect ("127.0.0.1", 5000);
+do_watering ();
+return 0;
 
-    char buffer [] = "notification";
-    unsigned char* p_answer = NULL;
-    unsigned int answer_size = 0;
+    while (1)
+    {
+        if (is_time_for_watering ())
+        {
+            do_watering ();
+        }
 
-    socket_client.send_and_receive ((unsigned char*)buffer, strlen (buffer) + 1,
-            &p_answer, &answer_size);
-    socket_client.close ();
+        if (is_time_for_temperature ())
+        {
+            do_temperature_check ();
+        }
 
-    if (answer_size)
-        DEBUG_LOG_INFO ("%s", p_answer);
-
-    if (p_answer)
-        delete p_answer;
+        sleep (1);
+    }
 
     return 0;
 }

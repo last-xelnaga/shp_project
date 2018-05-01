@@ -1,4 +1,7 @@
 
+#ifndef FCM_MESSAGING_CLASS_HPP
+#define FCM_MESSAGING_CLASS_HPP
+
 //https://stackoverflow.com/questions/1008019/c-singleton-design-pattern
 
 #include <string>
@@ -74,3 +77,5 @@ public:
     fcm_messaging_class (fcm_messaging_class const&) = delete;
     void operator=(fcm_messaging_class const&) = delete;
 };
+
+#endif // FCM_MESSAGING_CLASS_HPP
