@@ -36,7 +36,7 @@ int read_from_file (
         *size = ftell (f);
         fseek (f, 0, SEEK_SET);
 
-        *data = (char*)malloc (*size);
+        *data = (char*) malloc (*size);
         fread (*data, *size, 1, f);
         fclose (f);
     }
@@ -61,7 +61,7 @@ void drop_old_file (
         time_t now = time (NULL);
         if (now > buffer.st_ctime + exp_time)
         {
-            DEBUG_LOG_INFO ("file %s is old", file_name);
+            DEBUG_LOG_INFO ("file \"%s\" is old", file_name);
             unlink (file_name);
         }
     }
@@ -75,7 +75,7 @@ int does_file_exist (
     struct stat buffer;   
     if (stat (file_name, &buffer) != 0)
     {
-        DEBUG_LOG_ERROR ("file %s does not exist", file_name);
+        DEBUG_LOG_ERROR ("file \"%s\" does not exist", file_name);
         result = 0;
     }
 

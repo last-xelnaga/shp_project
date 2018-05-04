@@ -2,9 +2,7 @@
 #include "client_socket_class.hpp"
 #include "log.h"
 #include "network_manager_class.hpp"
-
-#define SERVER_IP       "127.0.0.1"
-#define SERVER_PORT     5000
+#include "settings_class.hpp"
 
 
 struct pws_message
@@ -21,10 +19,15 @@ network_manager_class::network_manager_class (
 }
 
 void network_manager_class::enqueue_message (
-        void)
+        std::string message)
 {
+    printf ("%s\n", message.c_str ());
+    
+    return;
+    
     client_socket_class socket_client;
-    socket_client.connect (SERVER_IP, SERVER_PORT);
+    socket_client.connect (settings_class::get_instance ().get_server_name ().c_str (),
+            settings_class::get_instance ().get_server_port ());
 
     char buffer [] = "notification";
     unsigned char* p_answer = NULL;

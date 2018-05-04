@@ -2,6 +2,9 @@
 #ifndef NETWORK_MANAGER_CLASS_HPP
 #define NETWORK_MANAGER_CLASS_HPP
 
+#include <string>
+
+
 class network_manager_class
 {
 private:
@@ -17,7 +20,7 @@ public:
     }
 
     void enqueue_message (
-            void);
+            std::string message);
 
     network_manager_class (network_manager_class const&) = delete;
     void operator=(network_manager_class const&) = delete;

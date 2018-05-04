@@ -1,7 +1,6 @@
 PREFIX	=
 -include makefile.prefix
 
-#REVFILE = REVISION
 TARGET = shp_server
 FLAGS = -O0 -g -ggdb
 #CFLAGS	+= -O2 -fno-omit-frame-pointer

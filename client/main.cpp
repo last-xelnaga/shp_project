@@ -2,35 +2,33 @@
 #include "network_manager_class.hpp"
 #include "log.h"
 #include "sensors.h"
+#include "settings_class.hpp"
+
 #include <string>
 #include <time.h>
 #include <unistd.h>
 
 
-bool is_time_for_watering (
+void do_app_start (
         void)
 {
-    return false;
+    DEBUG_LOG_INFO ("do_app_start");
+
+    std::string message = "{\n";
+    message += "  time : " + std::to_string (time (NULL)) + ",\n";
+
+    message += "  \"app_start\" : null\n";
+
+    message += "}\n";
+
+    // send the message
+    network_manager_class::get_instance ().enqueue_message (message);
 }
 
 void do_watering (
         void)
 {
-    /*{
-        "test3" : {
-            "x" : 123.456
-        },
-        "test4" : [
-            1,
-            2,
-            3,
-            {
-                "z" : 12345
-            }
-        ],
-        "test1" : "hello world",
-        "test2" : "BLAH\uD840\uDC8ABLAH"
-    }*/
+    DEBUG_LOG_INFO ("do_watering");
 
     std::string message = "{\n";
     message += "  time : " + std::to_string (time (NULL)) + ",\n";
@@ -47,7 +45,7 @@ void do_watering (
         if (water_pump_start () == 0)
         {
             // wait enough for the 100 ml
-            //sleep (90);
+            sleep (settings_class::get_instance ().get_pump_active_time ());
 
             // stop the pump
             water_pump_stop ();
@@ -65,45 +63,47 @@ void do_watering (
     }
     message += "  }\n}\n";
 
-    printf ("%s\n", message.c_str ());
-
     // send the message
-    //network_manager_class::get_instance().enqueue_message ();
-}
-
-bool is_time_for_temperature (
-        void)
-{
-    return false;
+    network_manager_class::get_instance ().enqueue_message (message);
 }
 
 void do_temperature_check (
         void)
 {
+    DEBUG_LOG_INFO ("do_temperature_check");
+
+    std::string message = "{\n";
+    message += "  time : " + std::to_string (time (NULL)) + ",\n";
+
+    message += "  \"dth\" : {\n";
+
     // get the current temperature
-    get_temperature ();
+    int temp = get_temperature ();
+    message += "    \"temp\" : " + std::to_string (temp) + ",\n";
 
     // and humidity
-    get_humidity ();
+    int hum = get_humidity ();
+    message += "    \"hum\" : " + std::to_string (hum) + "\n";
+
+    message += "  }\n}\n";
 
     // send the message
-    network_manager_class::get_instance().enqueue_message ();
+    network_manager_class::get_instance ().enqueue_message (message);
 }
 
 int main (
         void)
 {
-do_watering ();
-return 0;
+    do_app_start ();
 
     while (1)
     {
-        if (is_time_for_watering ())
+        if (settings_class::get_instance ().is_time_for_watering ())
         {
             do_watering ();
         }
 
-        if (is_time_for_temperature ())
+        if (settings_class::get_instance ().is_time_for_temperature ())
         {
             do_temperature_check ();
         }
