@@ -4,22 +4,29 @@
 #include "sensors.h"
 #include "settings_class.hpp"
 
+#include <signal.h>
 #include <string>
 #include <time.h>
 #include <unistd.h>
 
+
+volatile sig_atomic_t exit_flag = 1;
+
+void exit_function (
+        int sig)
+{
+    // happy compiler
+    if (sig) {}
+
+    exit_flag = 0;
+}
 
 void do_app_start (
         void)
 {
     DEBUG_LOG_INFO ("do_app_start");
 
-    std::string message = "{\n";
-    message += "  time : " + std::to_string (time (NULL)) + ",\n";
-
-    message += "  \"app_start\" : null\n";
-
-    message += "}\n";
+    std::string message = "  \"app_start\" : null\n";
 
     // send the message
     network_manager_class::get_instance ().enqueue_message (message);
@@ -30,10 +37,7 @@ void do_watering (
 {
     DEBUG_LOG_INFO ("do_watering");
 
-    std::string message = "{\n";
-    message += "  time : " + std::to_string (time (NULL)) + ",\n";
-
-    message += "  \"watering\" : {\n";
+    std::string message = "  \"watering\" : {\n";
 
     // get water level before watering
     int limit = get_liquid_level ();
@@ -61,7 +65,7 @@ void do_watering (
     {
         message += "    \"status\" : \"water level too low\"\n";
     }
-    message += "  }\n}\n";
+    message += "  }\n";
 
     // send the message
     network_manager_class::get_instance ().enqueue_message (message);
@@ -72,10 +76,7 @@ void do_temperature_check (
 {
     DEBUG_LOG_INFO ("do_temperature_check");
 
-    std::string message = "{\n";
-    message += "  time : " + std::to_string (time (NULL)) + ",\n";
-
-    message += "  \"dth\" : {\n";
+    std::string message = "  \"dth\" : {\n";
 
     // get the current temperature
     int temp = get_temperature ();
@@ -85,7 +86,7 @@ void do_temperature_check (
     int hum = get_humidity ();
     message += "    \"hum\" : " + std::to_string (hum) + "\n";
 
-    message += "  }\n}\n";
+    message += "  }\n";
 
     // send the message
     network_manager_class::get_instance ().enqueue_message (message);
@@ -94,9 +95,11 @@ void do_temperature_check (
 int main (
         void)
 {
+    signal (SIGINT, exit_function);
+
     do_app_start ();
 
-    while (1)
+    while (exit_flag)
     {
         if (settings_class::get_instance ().is_time_for_watering ())
         {
@@ -110,6 +113,8 @@ int main (
 
         sleep (1);
     }
+
+    DEBUG_LOG_INFO ("exit app");
 
     return 0;
 }

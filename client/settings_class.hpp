@@ -19,6 +19,7 @@ class settings_class
         // network settings
         std::string server_name;
         unsigned int server_port;
+        unsigned int server_batch_cycle;
 
         // flag
         char is_file_processed;
@@ -66,6 +67,13 @@ class settings_class
         {
             read_config_file ();
             return server_port;
+        }
+
+        unsigned int get_server_batch_cycle (
+                void)
+        {
+            read_config_file ();
+            return server_batch_cycle;
         }
 
     public:

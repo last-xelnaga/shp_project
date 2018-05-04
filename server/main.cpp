@@ -13,18 +13,23 @@ void server_worker (
     unsigned char* buffer = NULL;
     unsigned int size = 0;
 
-    p_client->recv_message (&buffer, &size);
-
-    if (size)
+    while (p_client->recv_message (&buffer, &size) == 0)
     {
-        fcm_messaging_class::get_instance ().register_message ("test_title", "test_body");
+        if (size)
+        {
+            printf ("%s\n", buffer);
+            
+            //fcm_messaging_class::get_instance ().register_message ("test_title", "test_body");
 
-        char answer [] = "huj";
-        p_client->send_message ((unsigned char*)answer, 4);
+            char answer [] = "OK";
+            p_client->send_message ((unsigned char*)answer, 3);
+        }
+
+        if (buffer)
+            delete [] buffer;
+        buffer = NULL;
+        size = 0;
     }
-
-    if (buffer)
-        delete buffer;
 }
 
 int main (

@@ -4,6 +4,7 @@
 #include "settings_class.hpp"
 
 #include <fstream>
+#include <pthread.h>
 #include <sstream>
 
 // default settings
@@ -12,6 +13,7 @@
 #define DHT_SLEEP_TIME          10      // check temp every 10 sec
 #define SERVER_NAME             "localhost"     // 127.0.0.1
 #define SERVER_PORT             5000
+#define SERVER_BATCH_CYCLE      60      // try to batch upload every min
 
 #define SETTINGS_FILE_NAME      "settings.cfg"  // name of the file with settings (optional)
 
@@ -28,6 +30,7 @@ settings_class::settings_class (
     dht_last_check_time = 0;
     server_name = SERVER_NAME;
     server_port = SERVER_PORT;
+    server_batch_cycle = SERVER_BATCH_CYCLE;
 
     is_file_processed = 0;
 }
@@ -55,10 +58,17 @@ void settings_class::init_key (
     else if (key == "server_name")
     {
         server_name = value;
+        DEBUG_LOG_INFO ("settings: \"server_name\" = %s", server_name.c_str ());
     }
     else if (key == "server_port")
     {
         server_port = std::stoi (value);
+        DEBUG_LOG_INFO ("settings: \"server_port\" = %d", server_port);
+    }
+    else if (key == "server_batch_cycle")
+    {
+        server_batch_cycle = std::stoi (value);
+        DEBUG_LOG_INFO ("settings: \"server_batch_cycle\" = %d", server_batch_cycle);
     }
     else
     {
@@ -76,6 +86,10 @@ void settings_class::read_config_file (
     // otherwise we have to try to read the settings file
     // enter the critical section, lock the mutex
     pthread_mutex_lock (&settings_mutex);
+
+    // check it again
+    if (is_file_processed)
+        return;
 
     DEBUG_LOG_INFO ("read_config_file");
 

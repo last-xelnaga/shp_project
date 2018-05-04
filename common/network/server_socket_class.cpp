@@ -39,7 +39,7 @@ int server_socket_class::server_client_class::recv_message (
 
     if (result == 0)
     {
-        *buffer = new unsigned char (*size);
+        *buffer = new unsigned char [*size];
     }
 
     if (result == 0)
