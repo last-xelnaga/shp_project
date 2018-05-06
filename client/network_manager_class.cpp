@@ -38,7 +38,7 @@ void* network_manager_class::network_manager_worker (
 void network_manager_class::process_batch (
         void)
 {
-    if (server_last_connection_time + settings_class::get_instance ().get_server_batch_cycle () > time (NULL))
+    if (server_last_connection_time + settings_class::get_instance ().get_server_batch_cycle () > (unsigned long) time (NULL))
     {
         DEBUG_LOG_INFO ("process_batch early");
         return;
@@ -47,7 +47,7 @@ void network_manager_class::process_batch (
     if (m_queue.size () == 0)
     {
         server_last_connection_time = time (NULL);
-        DEBUG_LOG_INFO ("no messages, new connection_time is %d", server_last_connection_time);
+        DEBUG_LOG_INFO ("no messages, new connection_time is %ld", server_last_connection_time);
         return;
     }
 

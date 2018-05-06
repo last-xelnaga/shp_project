@@ -6,8 +6,8 @@ TARGET = shp_client
 FLAGS = -O0 -g -ggdb
 
 OBJDIR = $(shell pwd)/obj
-INC = -I.
-LIB =
+INC = -I./../external/wiringPi/wiringPi
+LIB = -L./../external/wiringPi/wiringPi/ -lwiringPi -lrt
 
 SRCCPP := \
     main.cpp \

@@ -110,7 +110,7 @@ void settings_class::read_config_file (
             DEBUG_LOG_ERROR ("failed to open %s", SETTINGS_FILE_NAME);
         }
     }
-    
+
     if (status == 0)
     {
         DEBUG_LOG_ERROR ("settings will use default values");

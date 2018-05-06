@@ -12,7 +12,7 @@ private:
     long listener;
     std::list <std::string> m_queue;
     volatile char is_worker_active;
-    unsigned int server_last_connection_time;
+    unsigned long server_last_connection_time;
 
 private:
     network_manager_class (

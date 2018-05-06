@@ -14,7 +14,7 @@ class settings_class
 
         // dht settings
         unsigned int dht_sleep_time;
-        unsigned int dht_last_check_time;
+        unsigned long dht_last_check_time;
 
         // network settings
         std::string server_name;

@@ -10,7 +10,7 @@
 #include <unistd.h>
 
 
-volatile sig_atomic_t exit_flag = 1;
+volatile sig_atomic_t is_going_on;
 
 void exit_function (
         int sig)
@@ -18,10 +18,36 @@ void exit_function (
     // happy compiler
     if (sig) {}
 
-    exit_flag = 0;
+    is_going_on = 0;
 }
 
-void do_app_start (
+static int board_setup (
+        void)
+{
+    int result = 0;
+
+    if (geteuid () != 0)
+    {
+        DEBUG_LOG_ERROR ("need to be root to run");
+        result = -1;
+    }
+
+    if (result == 0)
+    {
+        if (wiringPiSetup () == -1)
+        {
+            DEBUG_LOG_ERROR ("wiringPiSetup has failed");
+            result = -1;
+        }
+    }
+
+    if (result == 0)
+        wiringPiSetupGpio ();
+
+    return result;
+}
+
+static void do_app_start (
         void)
 {
     DEBUG_LOG_INFO ("do_app_start");
@@ -32,7 +58,7 @@ void do_app_start (
     network_manager_class::get_instance ().enqueue_message (message);
 }
 
-void do_watering (
+static void do_watering (
         void)
 {
     DEBUG_LOG_INFO ("do_watering");
@@ -46,20 +72,15 @@ void do_watering (
     if (limit > 1)
     {
         // start the pump
-        if (water_pump_start () == 0)
-        {
-            // wait enough for the 100 ml
-            sleep (settings_class::get_instance ().get_pump_active_time ());
+        water_pump_start ();
 
-            // stop the pump
-            water_pump_stop ();
+        // wait enough for the 100 ml
+        sleep (settings_class::get_instance ().get_pump_active_time ());
 
-            message += "    \"status\" : \"OK\"\n";
-        }
-        else
-        {
-            message += "    \"status\" : \"failed to start pump\"\n";
-        }
+        // stop the pump
+        water_pump_stop ();
+
+        message += "    \"status\" : \"OK\"\n";
     }
     else
     {
@@ -71,21 +92,18 @@ void do_watering (
     network_manager_class::get_instance ().enqueue_message (message);
 }
 
-void do_temperature_check (
+static void do_temperature_check (
         void)
 {
     DEBUG_LOG_INFO ("do_temperature_check");
 
     std::string message = "  \"dth\" : {\n";
 
-    // get the current temperature
-    int temp = get_temperature ();
+    // get the current temperature and humidity
+    int temp, hum;
+    dht_get_data (&temp, &hum);
     message += "    \"temp\" : " + std::to_string (temp) + ",\n";
-
-    // and humidity
-    int hum = get_humidity ();
     message += "    \"hum\" : " + std::to_string (hum) + "\n";
-
     message += "  }\n";
 
     // send the message
@@ -95,21 +113,29 @@ void do_temperature_check (
 int main (
         void)
 {
+    is_going_on = 1;
+
     signal (SIGINT, exit_function);
 
     do_app_start ();
 
-    while (exit_flag)
+    if (is_going_on)
+        if (board_setup ())
+            is_going_on = 0;
+
+    if (is_going_on)
+    {
+        water_pump_setup ();
+        dht_setup ();
+    }
+
+    while (is_going_on)
     {
         if (settings_class::get_instance ().is_time_for_watering ())
-        {
             do_watering ();
-        }
 
         if (settings_class::get_instance ().is_time_for_temperature ())
-        {
             do_temperature_check ();
-        }
 
         sleep (1);
     }

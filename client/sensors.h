@@ -6,16 +6,28 @@
 extern "C" {
 #endif
 
-int get_temperature (
+#include <wiringPi.h>
+
+void dht_setup (
         void);
 
-int get_humidity (
+void dht_get_data (
+        int* temperature,
+        int* humidity);
+
+
+void liquid_level_setup (
         void);
 
 int get_liquid_level (
         void);
 
-int water_pump_start (
+
+// water pump
+void water_pump_setup (
+        void);
+
+void water_pump_start (
         void);
 
 void water_pump_stop (

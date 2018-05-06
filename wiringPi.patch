@@ -1,0 +1,31 @@
+--- Makefile	2018-05-06 14:41:46.375126935 +0200
++++ Makefile.new	2018-05-06 14:41:12.144499353 +0200
+@@ -35,8 +35,12 @@
+ DYNAMIC=libwiringPi.so.$(VERSION)
+ 
+ #DEBUG	= -g -O0
++PREFIX	=
++-include ../../../client/makefile.prefix
+ DEBUG	= -O2
+-CC	= gcc
++CC	= $(PREFIX)gcc
++AR	= $(PREFIX)ar
++RANLIB	= $(PREFIX)ranlib
+ INCLUDE	= -I.
+ DEFS	= -D_GNU_SOURCE
+ CFLAGS	= $(DEBUG) $(DEFS) -Wformat=2 -Wall -Wextra -Winline $(INCLUDE) -pipe -fPIC
+@@ -70,8 +74,12 @@
+ all:		$(DYNAMIC)
+ 
+ .PHONY:	static
+-static:	
+-		$Q cat noMoreStatic
++static:	$(STATIC)
++
++$(STATIC):	$(OBJ)
++	$Q echo "[Link (Static)]"
++	$Q $(AR) rcs $(STATIC) $(OBJ)
++	$Q $(RANLIB) $(STATIC)
+ 
+ $(DYNAMIC):	$(OBJ)
+ 	$Q echo "[Link (Dynamic)]"

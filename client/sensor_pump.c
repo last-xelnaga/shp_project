@@ -3,19 +3,28 @@
 #include "sensors.h"
 
 // pump relay gpio
-#define PUMP_RELAY_PIN          2
+#define PUMP_RELAY_GPIO         4
 
 
-int water_pump_start (
+void water_pump_setup (
+        void)
+{
+    pinMode (PUMP_RELAY_GPIO, OUTPUT);
+    digitalWrite (PUMP_RELAY_GPIO, LOW);
+}
+
+void water_pump_start (
         void)
 {
     DEBUG_LOG_INFO ("water_pump_start");
 
-    return 0;
+    digitalWrite (PUMP_RELAY_GPIO, HIGH);
 }
 
 void water_pump_stop (
         void)
 {
     DEBUG_LOG_INFO ("water_pump_stop");
+
+    digitalWrite (PUMP_RELAY_GPIO, LOW);
 }

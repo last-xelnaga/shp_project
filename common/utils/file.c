@@ -55,11 +55,11 @@ void drop_old_file (
         const char* file_name,
         unsigned int exp_time)
 {
-    struct stat buffer;   
+    struct stat buffer;
     if (stat (file_name, &buffer) == 0)
     {
         time_t now = time (NULL);
-        if (now > buffer.st_ctime + exp_time)
+        if ((unsigned long)now > (unsigned long)(buffer.st_ctime + exp_time))
         {
             DEBUG_LOG_INFO ("file \"%s\" is old", file_name);
             unlink (file_name);
@@ -72,7 +72,7 @@ int does_file_exist (
 {
     int result = 1;
 
-    struct stat buffer;   
+    struct stat buffer;
     if (stat (file_name, &buffer) != 0)
     {
         DEBUG_LOG_ERROR ("file \"%s\" does not exist", file_name);

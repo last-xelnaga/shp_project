@@ -5,6 +5,12 @@
 #define CHECKER_RELAY_PIN       5
 
 
+void liquid_level_setup (
+        void)
+{
+    
+}
+
 int get_liquid_level (
         void)
 {
