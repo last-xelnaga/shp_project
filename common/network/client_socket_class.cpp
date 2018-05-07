@@ -151,7 +151,7 @@ int client_socket_class::send_and_receive (
 
     if (result == 0)
     {
-        *p_answer = new unsigned char (*answer_size);
+        *p_answer = new unsigned char [*answer_size];
     }
 
     if (result == 0)
