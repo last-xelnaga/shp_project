@@ -73,6 +73,7 @@ if [ $arch == "x86_64" ]; then
         info "create makefile.prefix ..."
         cd $root
         echo "PREFIX = $tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin/arm-linux-gnueabihf-" > ./client/makefile.prefix
+        echo "WIRING_LIB := yes" >> ./client/makefile.prefix
     else
         echo "PREFIX = " > ./client/makefile.prefix
     fi

@@ -40,7 +40,7 @@ void network_manager_class::process_batch (
 {
     if (server_last_connection_time + settings_class::get_instance ().get_server_batch_cycle () > (unsigned long) time (NULL))
     {
-        DEBUG_LOG_INFO ("process_batch early");
+        //DEBUG_LOG_INFO ("process_batch early");
         return;
     }
 
@@ -78,7 +78,7 @@ void network_manager_class::process_batch (
                 //    DEBUG_LOG_INFO ("%s", p_answer);
 
                 if (p_answer)
-                    delete p_answer;
+                    delete [] p_answer;
 
                 m_queue.erase (it ++);
             }
@@ -96,6 +96,28 @@ void network_manager_class::process_batch (
     DEBUG_LOG_INFO ("new server_last_connection_time %d", server_last_connection_time);
 }
 
+static char* get_time_str (
+        time_t now)
+{
+    struct tm* tm = localtime (&now);
+
+    static char mon_name [12][4] =
+    {
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    };
+
+    static char result [21];
+
+    sprintf (result, "%d %s %.2d %.2d:%.2d:%.2d",
+        1900 + tm->tm_year,
+        mon_name [tm->tm_mon],
+        tm->tm_mday,
+        tm->tm_hour,
+        tm->tm_min,
+        tm->tm_sec);
+    return result;
+}
 
 // public methods
 void network_manager_class::enqueue_message (
@@ -103,8 +125,12 @@ void network_manager_class::enqueue_message (
 {
     DEBUG_LOG_INFO ("add new message to the queue");
 
+    time_t now = time (NULL);
+
+
     std::string evt_message = "{\n";
-    evt_message += "  evt_time : " + std::to_string (time (NULL)) + ",\n";
+    evt_message += "  \"evt_time\" : \"" + std::string (get_time_str (now)) + "\",\n";
+    evt_message += "  \"evt_time_unix\" : " + std::to_string (now) + ",\n";
     evt_message += message;
     evt_message += "}\n";
 

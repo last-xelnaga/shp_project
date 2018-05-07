@@ -5,12 +5,10 @@
 #include "settings_class.hpp"
 
 #include <signal.h>
-#include <string>
-#include <time.h>
 #include <unistd.h>
 
 
-volatile sig_atomic_t is_going_on;
+volatile sig_atomic_t is_going_on = 1;
 
 void exit_function (
         int sig)
@@ -19,32 +17,6 @@ void exit_function (
     if (sig) {}
 
     is_going_on = 0;
-}
-
-static int board_setup (
-        void)
-{
-    int result = 0;
-
-    if (geteuid () != 0)
-    {
-        DEBUG_LOG_ERROR ("need to be root to run");
-        result = -1;
-    }
-
-    if (result == 0)
-    {
-        if (wiringPiSetup () == -1)
-        {
-            DEBUG_LOG_ERROR ("wiringPiSetup has failed");
-            result = -1;
-        }
-    }
-
-    if (result == 0)
-        wiringPiSetupGpio ();
-
-    return result;
 }
 
 static void do_app_start (
@@ -113,8 +85,6 @@ static void do_temperature_check (
 int main (
         void)
 {
-    is_going_on = 1;
-
     signal (SIGINT, exit_function);
 
     do_app_start ();
@@ -127,6 +97,7 @@ int main (
     {
         water_pump_setup ();
         dht_setup ();
+        liquid_level_setup ();
     }
 
     while (is_going_on)

@@ -6,7 +6,13 @@
 extern "C" {
 #endif
 
+#ifdef USE_WIRINGPI_LIB
 #include <wiringPi.h>
+#endif // USE_WIRINGPI_LIB
+
+
+int board_setup (
+        void);
 
 void dht_setup (
         void);

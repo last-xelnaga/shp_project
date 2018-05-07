@@ -2,18 +2,52 @@
 #include "log.h"
 #include "sensors.h"
 
-#include <stdio.h>
-#include <unistd.h>
+// pump relay gpio
+#define PUMP_RELAY_GPIO         4
 
+// dht11 temperature and humidity sensor gpio
 #define DHT_TERMO_GPIO          6
-#define DATA_LENGTH             5
+// retry count for the read_data process
 #define RETRY_COUNT             3
 
+// dth output data size
+#define DATA_LENGTH             5
+// init macro
 #define INIT_DATA               p_data[0]=0;p_data[1]=0;p_data[2]=0;p_data[3]=0;p_data[4]=0;
-
-
 unsigned char p_data [DATA_LENGTH];
 
+// wiringPi setup
+int board_setup (
+        void)
+{
+    int result = 0;
+
+#ifdef USE_WIRINGPI_LIB
+    if (geteuid () != 0)
+    {
+        DEBUG_LOG_ERROR ("need to be root to run");
+        result = -1;
+    }
+
+    if (result == 0)
+    {
+        if (wiringPiSetup () == -1)
+        {
+            DEBUG_LOG_ERROR ("wiringPiSetup has failed");
+            result = -1;
+        }
+    }
+
+    if (result == 0)
+        wiringPiSetupGpio ();
+#endif // #ifdef USE_WIRINGPI_LIB
+
+    return result;
+}
+
+
+// temperature and humidity sensor
+#ifdef USE_WIRINGPI_LIB
 static void read_data (
         void)
 {
@@ -103,16 +137,17 @@ static int is_data_crc_valid (
 
     return result;
 }
+#endif // #ifdef USE_WIRINGPI_LIB
 
 static void do_read (
         void)
 {
-    int retry_count = RETRY_COUNT;
-
     INIT_DATA
 
-    while (0)
-    //while (1)
+#ifdef USE_WIRINGPI_LIB
+    int retry_count = RETRY_COUNT;
+
+    while (1)
     {
         read_data ();
 
@@ -126,17 +161,20 @@ static void do_read (
 
         sleep (1);
     }
+#endif // #ifdef USE_WIRINGPI_LIB
 }
-
 
 void dht_setup (
         void)
 {
+    DEBUG_LOG_INFO ("dht_setup");
+#ifdef USE_WIRINGPI_LIB
     pinMode (DHT_TERMO_GPIO, OUTPUT);
 
     // pull the bus high. this one will show to sensor
     // that it could stay in low-power-consumption mode
     digitalWrite (DHT_TERMO_GPIO, HIGH);
+#endif // #ifdef USE_WIRINGPI_LIB
 }
 
 void dht_get_data (
@@ -154,4 +192,50 @@ void dht_get_data (
     *temperature = p_data [2];
     *temperature <<= 8;
     *temperature += p_data [3];
+}
+
+
+// liquid_level sensor
+void liquid_level_setup (
+        void)
+{
+    DEBUG_LOG_INFO ("liquid_level_setup");
+}
+
+int get_liquid_level (
+        void)
+{
+    DEBUG_LOG_INFO ("get_liquid_level");
+
+    return 55;
+}
+
+
+// water pump operated by relay 
+void water_pump_setup (
+        void)
+{
+    DEBUG_LOG_INFO ("water_pump_setup");
+#ifdef USE_WIRINGPI_LIB
+    pinMode (PUMP_RELAY_GPIO, OUTPUT);
+    digitalWrite (PUMP_RELAY_GPIO, LOW);
+#endif // #ifdef USE_WIRINGPI_LIB
+}
+
+void water_pump_start (
+        void)
+{
+    DEBUG_LOG_INFO ("water_pump_start");
+#ifdef USE_WIRINGPI_LIB
+    digitalWrite (PUMP_RELAY_GPIO, HIGH);
+#endif // #ifdef USE_WIRINGPI_LIB
+}
+
+void water_pump_stop (
+        void)
+{
+    DEBUG_LOG_INFO ("water_pump_stop");
+#ifdef USE_WIRINGPI_LIB
+    digitalWrite (PUMP_RELAY_GPIO, LOW);
+#endif // #ifdef USE_WIRINGPI_LIB
 }
