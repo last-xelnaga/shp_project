@@ -3,9 +3,21 @@
 #include "fcm_messaging_class.hpp"
 #include "server_socket_class.hpp"
 
+#include <signal.h>
 #include <stdio.h>
 #include <unistd.h>
 
+
+volatile sig_atomic_t is_going_on = 1;
+
+void exit_function (
+        int sig)
+{
+    // happy compiler
+    if (sig) {}
+
+    is_going_on = 0;
+}
 
 void server_worker (
         server_socket_class::server_client_class* p_client)
@@ -35,16 +47,15 @@ void server_worker (
 int main (
         void)
 {
+    signal (SIGINT, exit_function);
+
     server_socket_class server_socket;
     server_socket.start (5000, &server_worker);
 
-    sleep (1);
-    DEBUG_LOG_INFO ("press q + Enter to exit");
-    do
+    while (is_going_on)
     {
-        usleep (1000);
+        sleep (1);
     }
-    while (getchar () != 'q');
 
     DEBUG_LOG_INFO ("quiting...");
     server_socket.terminate ();
