@@ -1,5 +1,3 @@
-PREFIX	=
--include makefile.prefix
 
 TARGET = shp_server
 FLAGS = -O0 -g -ggdb
@@ -10,8 +8,9 @@ INC = -I. -I./../external/cpp-json/include
 LIB = -lcurl -lssl -lcrypto
 
 SRCCPP := \
+    fcm_messaging_class.cpp \
     main.cpp \
-    fcm_messaging_class.cpp
+    server_worker.cpp
 
 # sources
 include ../common/log/.rules
@@ -25,5 +24,6 @@ include ../common/build/.rules
 include ../common/log/.debs
 include ../common/network/.debs
 include ../common/utils/.debs
-$(OBJDIR)/main.o: log.h fcm_messaging_class.hpp server_socket_class.hpp Makefile
 $(OBJDIR)/fcm_messaging_class.o: base64.h fcm_messaging_class.hpp file.h log.h sha256.h Makefile
+$(OBJDIR)/main.o: log.h server_socket_class.hpp server_worker.hpp Makefile
+$(OBJDIR)/server_worker.o: fcm_messaging_class.hpp log.h server_socket_class.hpp server_worker.hpp Makefile

@@ -24,7 +24,7 @@ static void do_app_start (
 {
     DEBUG_LOG_INFO ("do_app_start");
 
-    std::string message = "  \"app_start\" : null\n";
+    std::string message = "  \"type\" : \"app_start\"\n";
 
     // send the message
     network_manager_class::get_instance ().enqueue_message (message);
@@ -35,10 +35,12 @@ static void do_watering (
 {
     DEBUG_LOG_INFO ("do_watering");
 
-    std::string message = "  \"watering\" : {\n";
+    // set the type
+    std::string message = "  \"type\" : \"watering\",\n";
 
     // get water level before watering
     int limit = get_liquid_level ();
+    message += "  \"data\" : {\n";
     message += "    \"limit\" : " + std::to_string (limit) + ",\n";
 
     if (limit > 1)
@@ -69,11 +71,13 @@ static void do_temperature_check (
 {
     DEBUG_LOG_INFO ("do_temperature_check");
 
-    std::string message = "  \"dth\" : {\n";
+    // set the type
+    std::string message = "  \"type\" : \"dht\",\n";
 
     // get the current temperature and humidity
     int temp, hum;
     dht_get_data (&temp, &hum);
+    message += "  \"data\" : {\n";
     message += "    \"temp\" : " + std::to_string (temp) + ",\n";
     message += "    \"hum\" : " + std::to_string (hum) + "\n";
     message += "  }\n";

@@ -129,6 +129,7 @@ void network_manager_class::enqueue_message (
 
 
     std::string evt_message = "{\n";
+    evt_message += "  \"client\" : \"pws\",\n";
     evt_message += "  \"evt_time\" : \"" + std::string (get_time_str (now)) + "\",\n";
     evt_message += "  \"evt_time_unix\" : " + std::to_string (now) + ",\n";
     evt_message += message;
