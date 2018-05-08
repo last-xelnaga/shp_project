@@ -11,13 +11,14 @@ extern "C" {
 #endif // USE_WIRINGPI_LIB
 
 
-int board_setup (
+int raspberry_board_setup (
         void);
 
-void dht_setup (
+
+void sensor_dht11_setup (
         void);
 
-void dht_get_data (
+void sensor_dht11_get_data (
         int* temperature,
         int* humidity);
 
@@ -30,13 +31,13 @@ int get_liquid_level (
 
 
 // water pump
-void water_pump_setup (
+void sensor_relay_water_pump_setup (
         void);
 
-void water_pump_start (
+void sensor_relay_water_pump_start (
         void);
 
-void water_pump_stop (
+void sensor_relay_water_pump_stop (
         void);
 
 #ifdef __cplusplus

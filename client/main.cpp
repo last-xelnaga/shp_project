@@ -46,13 +46,13 @@ static void do_watering (
     if (limit > 1)
     {
         // start the pump
-        water_pump_start ();
+        sensor_relay_water_pump_start ();
 
         // wait enough for the 100 ml
         sleep (settings_class::get_instance ().get_pump_active_time ());
 
         // stop the pump
-        water_pump_stop ();
+        sensor_relay_water_pump_stop ();
 
         message += "    \"status\" : \"OK\"\n";
     }
@@ -75,11 +75,11 @@ static void do_temperature_check (
     std::string message = "  \"type\" : \"dht\",\n";
 
     // get the current temperature and humidity
-    int temp, hum;
-    dht_get_data (&temp, &hum);
+    int hum, temp;
+    sensor_dht11_get_data (&hum, &temp);
     message += "  \"data\" : {\n";
-    message += "    \"temp\" : " + std::to_string (temp) + ",\n";
-    message += "    \"hum\" : " + std::to_string (hum) + "\n";
+    message += "    \"hum\" : " + std::to_string (hum) + ",\n";
+    message += "    \"temp\" : " + std::to_string (temp) + "\n";
     message += "  }\n";
 
     // send the message
@@ -94,15 +94,20 @@ int main (
     do_app_start ();
 
     if (is_going_on)
-        if (board_setup ())
+        if (raspberry_board_setup ())
             is_going_on = 0;
 
     if (is_going_on)
     {
-        water_pump_setup ();
-        dht_setup ();
+        sensor_relay_water_pump_setup ();
+        sensor_dht11_setup ();
         liquid_level_setup ();
     }
+
+    //int temp, hum;
+    //sensor_dht11_get_data (&hum, &temp);
+    //DEBUG_LOG_INFO ("hum %d, temp %d", hum, temp);
+    //return 0;
 
     while (is_going_on)
     {

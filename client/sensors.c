@@ -2,11 +2,14 @@
 #include "log.h"
 #include "sensors.h"
 
+#include <unistd.h>
+
+
 // pump relay gpio
-#define PUMP_RELAY_GPIO         4
+#define SENSOR_RELAY_WATER_PUMP_GPIO    4
 
 // dht11 temperature and humidity sensor gpio
-#define DHT_TERMO_GPIO          6
+#define SENSOR_DHT11_GPIO       6
 // retry count for the read_data process
 #define RETRY_COUNT             3
 
@@ -14,10 +17,11 @@
 #define DATA_LENGTH             5
 // init macro
 #define INIT_DATA               p_data[0]=0;p_data[1]=0;p_data[2]=0;p_data[3]=0;p_data[4]=0;
+
 unsigned char p_data [DATA_LENGTH];
 
 // wiringPi setup
-int board_setup (
+int raspberry_board_setup (
         void)
 {
     int result = 0;
@@ -53,51 +57,69 @@ static void read_data (
 {
     // send 'start' command
     // pull the bus down
-    digitalWrite (DHT_TERMO_GPIO, LOW);
+    digitalWrite (SENSOR_DHT11_GPIO, LOW);
     // and wait at least 18ms
-    delayMicroseconds (30000);
+    delayMicroseconds (18000);
 
     // now pull the bus up
-    digitalWrite (DHT_TERMO_GPIO, HIGH);
-
-    // at this point the sensor should start to react
-    // on our 'start' command
-    pinMode (DHT_TERMO_GPIO, INPUT);
+    digitalWrite (SENSOR_DHT11_GPIO, HIGH);
 
     // and wait for response (20 - 40 us)
     delayMicroseconds (20);
 
+    // at this point the sensor should start to react
+    // on our 'start' command
+    pinMode (SENSOR_DHT11_GPIO, INPUT);
+
+
     // sensor has to lower the bus, so wait for it
-    while (digitalRead (DHT_TERMO_GPIO) == HIGH);
-    //wait_for_level (fp, LOW);
+    //while (digitalRead (SENSOR_DHT11_GPIO) == HIGH);
+    unsigned long loop_count = 1000000;
+    while (digitalRead (SENSOR_DHT11_GPIO) == HIGH)
+    {
+        if (-- loop_count == 0)
+            return;
+    }
+
     // he has to keep low level for 80 us
-    delayMicroseconds (80);
+    delayMicroseconds (70);
 
     // and than put it high again. wait for it as well
-    while (digitalRead (DHT_TERMO_GPIO) == LOW);
-    //wait_for_level (fp, HIGH);
+    //while (digitalRead (SENSOR_DHT11_GPIO) == LOW);
+    loop_count = 1000000;
+    while (digitalRead (SENSOR_DHT11_GPIO) == LOW)
+    {
+        if (-- loop_count == 0)
+            return;
+    }
+
     // it will keep hight level for 80 us, so skip them
-    delayMicroseconds (80);
+    //delayMicroseconds (50);
+
+    DEBUG_LOG_INFO ("read dht bits");
 
     // and it's ready to send 40 bits of data
-    for (unsigned int i = 0; i < DATA_LENGTH; ++ i)
+    /*for (unsigned int i = 0; i < DATA_LENGTH; ++ i)
     {
         // receive temperature and humidity data, the parity bit is not considered
         unsigned char byte = 0;
         for (int bit = 0; bit < 8; ++ bit)
         {
             // wait for low bus. indicates that the transmission has started
-            while (digitalRead (DHT_TERMO_GPIO) == HIGH);
+            while (digitalRead (SENSOR_DHT11_GPIO) == HIGH);
+
+            unsigned long t = micros ();
 
             // wait for 50 us of the low level. skip it
-            while (digitalRead (DHT_TERMO_GPIO) == LOW);
+            while (digitalRead (SENSOR_DHT11_GPIO) == LOW);
 
             // now the sensor has switched the bus to high level
             // wait for 30 us to check the bus level again
-            delayMicroseconds (28);
+            //delayMicroseconds (28);
 
             // check the bus again
-            if (digitalRead (DHT_TERMO_GPIO) == HIGH)
+            //if (digitalRead (SENSOR_DHT11_GPIO) == HIGH)
+            if ((micros () - t) > 40)
             {
                 // high bus after 30 ms means that we got '1',
                 // since '1' requires 70 ms of high bus.
@@ -106,13 +128,52 @@ static void read_data (
             }
         }
         p_data [i] = byte;
+    }*/
+
+    unsigned char mask = 128;
+    unsigned char idx = 0;
+
+    for (unsigned int i = 0; i < 40; ++ i)
+    {
+        loop_count = 1000000;
+        while (digitalRead (SENSOR_DHT11_GPIO) == HIGH)
+        {
+            //delayMicroseconds (5);
+            if (-- loop_count == 0)
+                return;
+        }
+        // wait for 50 us of the low level
+        delayMicroseconds (40);
+
+        loop_count = 1000000;
+        while (digitalRead (SENSOR_DHT11_GPIO) == LOW)
+        {
+            //delayMicroseconds (5);
+            if (-- loop_count == 0)
+                return;
+        }
+
+        unsigned long t = micros ();
+
+        loop_count = 1000000;
+        while (digitalRead (SENSOR_DHT11_GPIO) == HIGH)
+        {
+            //delayMicroseconds (10);
+            if (-- loop_count == 0)
+                return;
+        }
+
+        if ((micros () - t) > 40)
+        {
+            p_data [idx] |= mask;
+        }
+        mask >>= 1;
+        if (mask == 0)   // next byte?
+        {
+            mask = 128;
+            idx ++;
+        }
     }
-
-    pinMode (DHT_TERMO_GPIO, OUTPUT);
-
-    // pull the bus high. this one will show to sensor
-    // that it could stay in low-power-consumption mode
-    digitalWrite (DHT_TERMO_GPIO, HIGH);
 }
 
 static int is_data_crc_valid (
@@ -121,18 +182,17 @@ static int is_data_crc_valid (
     int result = 1;
 
     // check the crc of the data buffer
-    unsigned int crc = p_data [0] + p_data [1] + p_data [2] + p_data [3];
-    crc |= 0x0F;
-
+    unsigned char crc = p_data [0] + p_data [1] + p_data [2] + p_data [3];
     if (crc != p_data [4])
     {
         result = 0;
-        DEBUG_LOG_ERROR ("%s temp %i.%i, hum %i.%i, crc %i", "dht11", p_data [0], p_data [1], p_data [2], p_data [3], p_data [4]);
+        DEBUG_LOG_ERROR ("crc FAILED, hum %d %d, temp %d %d, crc %d (%d)",
+                p_data [0], p_data [1], p_data [2], p_data [3], p_data [4], crc);
     }
     else
     {
-        DEBUG_LOG_INFO ("crc OK");
-        DEBUG_LOG_INFO ("%d %d %d %d", p_data [0], p_data [1], p_data [2], p_data [3]);
+        DEBUG_LOG_INFO ("crc OK, hum %d %d, temp %d %d, crc %d (%d)",
+                p_data [0], p_data [1], p_data [2], p_data [3], p_data [4], crc);
     }
 
     return result;
@@ -151,6 +211,9 @@ static void do_read (
     {
         read_data ();
 
+        sensor_dht11_setup ();
+
+        //is_data_crc_valid ();
         if (is_data_crc_valid ())
             break;
 
@@ -164,34 +227,40 @@ static void do_read (
 #endif // #ifdef USE_WIRINGPI_LIB
 }
 
-void dht_setup (
+void sensor_dht11_setup (
         void)
 {
-    DEBUG_LOG_INFO ("dht_setup");
+    DEBUG_LOG_INFO ("sensor_dht11_setup");
 #ifdef USE_WIRINGPI_LIB
-    pinMode (DHT_TERMO_GPIO, OUTPUT);
+    pinMode (SENSOR_DHT11_GPIO, OUTPUT);
 
     // pull the bus high. this one will show to sensor
     // that it could stay in low-power-consumption mode
-    digitalWrite (DHT_TERMO_GPIO, HIGH);
+    digitalWrite (SENSOR_DHT11_GPIO, HIGH);
 #endif // #ifdef USE_WIRINGPI_LIB
 }
 
-void dht_get_data (
+void sensor_dht11_get_data (
         int* temperature,
         int* humidity)
 {
-    DEBUG_LOG_INFO ("dht_get_data");
+    DEBUG_LOG_INFO ("sensor_dht11_get_data");
 
     do_read ();
 
     *humidity = p_data [0];
     *humidity <<= 8;
     *humidity += p_data [1];
+    *humidity *= .1;
 
-    *temperature = p_data [2];
+    *temperature = p_data [2] & 0x7F;
     *temperature <<= 8;
     *temperature += p_data [3];
+    *temperature *= .1;
+
+    // negative temperature
+    if (p_data [2] & 0x80)
+        *temperature *= -1;
 }
 
 
@@ -211,31 +280,31 @@ int get_liquid_level (
 }
 
 
-// water pump operated by relay 
-void water_pump_setup (
+// water pump operated by relay
+void sensor_relay_water_pump_setup (
         void)
 {
-    DEBUG_LOG_INFO ("water_pump_setup");
+    DEBUG_LOG_INFO ("sensor_relay_water_pump_setup");
 #ifdef USE_WIRINGPI_LIB
-    pinMode (PUMP_RELAY_GPIO, OUTPUT);
-    digitalWrite (PUMP_RELAY_GPIO, LOW);
+    pinMode (SENSOR_RELAY_WATER_PUMP_GPIO, OUTPUT);
+    digitalWrite (SENSOR_RELAY_WATER_PUMP_GPIO, LOW);
 #endif // #ifdef USE_WIRINGPI_LIB
 }
 
-void water_pump_start (
+void sensor_relay_water_pump_start (
         void)
 {
-    DEBUG_LOG_INFO ("water_pump_start");
+    DEBUG_LOG_INFO ("sensor_relay_water_pump_start");
 #ifdef USE_WIRINGPI_LIB
-    digitalWrite (PUMP_RELAY_GPIO, HIGH);
+    digitalWrite (SENSOR_RELAY_WATER_PUMP_GPIO, HIGH);
 #endif // #ifdef USE_WIRINGPI_LIB
 }
 
-void water_pump_stop (
+void sensor_relay_water_pump_stop (
         void)
 {
-    DEBUG_LOG_INFO ("water_pump_stop");
+    DEBUG_LOG_INFO ("sensor_relay_water_pump_stop");
 #ifdef USE_WIRINGPI_LIB
-    digitalWrite (PUMP_RELAY_GPIO, LOW);
+    digitalWrite (SENSOR_RELAY_WATER_PUMP_GPIO, LOW);
 #endif // #ifdef USE_WIRINGPI_LIB
 }
