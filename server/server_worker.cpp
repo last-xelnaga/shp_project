@@ -54,14 +54,14 @@ int process_message (
     json::value type = json ["type"];
     std::string type_str = stringify (type, json::ESCAPE_UNICODE);
 
-    //DEBUG_LOG_INFO ("got new message, type %s", type_str.c_str ());
+    DEBUG_LOG_INFO ("got new message, type %s", type_str.c_str ());
 
     if (type_str == "\"dht\"")
     {
         //DEBUG_LOG_INFO ("temp");
         json::value temp = json ["data"]["temp"];
         int temperature = to_number (temp);
-        
+
         json::value hum = json ["data"]["hum"];
         int humidity = to_number (hum);
 
@@ -116,7 +116,7 @@ int process_message (
         //DEBUG_LOG_ERROR ("unknown message");
         result = -1;
     }
-    
+
     return result;
 }
 
@@ -131,7 +131,7 @@ void server_worker (
         if (size)
         {
             int result = process_message ((char*)buffer);
-            
+
             if (result == 0)
                 p_client->send_message ((unsigned char*)"OK", 3);
             else

@@ -57,7 +57,7 @@ int fcm_messaging_class::parse_service_account_json (
 
         // get the first occurrence of endl
         size_t pos = m_pem_private_key.find ("\\n");
- 
+
         // and remove them all
         while (pos != std::string::npos)
         {
@@ -105,7 +105,7 @@ int fcm_messaging_class::prepare_jwt (
         snprintf (message,  sizeof (message) - 1,
                 "{\"iss\":%s,\"scope\":\"https://www.googleapis.com/auth/firebase.messaging\",\
                 \"aud\":\"https://www.googleapis.com/oauth2/v4/token\",\"exp\":%ld,\"iat\":%ld}",
-                m_email.c_str () /*"firebase-adminsdk-9n8jv@shp-server.iam.gserviceaccount.com"*/, exp_time, curr_time);
+                m_email.c_str (), exp_time, curr_time);
         char* claim = base64url_encode ((unsigned char*)message, strlen (message), &base64_length);
 
         // append the claim to the jws data
@@ -289,7 +289,7 @@ unsigned int fcm_messaging_class::request_new_access_token_callback (
         fcm_messaging_class* p_base)
 {
     p_base->update_new_access_token (ptr, size * nmemb);
-    return size * nmemb;    
+    return size * nmemb;
 }
 
 void fcm_messaging_class::update_new_access_token (

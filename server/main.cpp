@@ -8,6 +8,7 @@
 
 #define SERVER_PORT         5000
 
+
 volatile sig_atomic_t is_going_on = 1;
 
 void exit_function (
@@ -29,7 +30,6 @@ int main (
 
     while (is_going_on)
     {
-        show_table ();
         sleep (1);
     }
 
