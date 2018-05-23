@@ -2,9 +2,40 @@
 #ifndef SOCKET_SERVER_HPP
 #define SOCKET_SERVER_HPP
 
+#include <atomic>
+#include <list>
+#include <thread>
+
 
 class server_socket_class
 {
+private:
+    class spinlock_class
+    {
+    private:
+        std::atomic_flag flag;
+
+    public:
+        spinlock_class (
+                void) : flag (ATOMIC_FLAG_INIT)
+        {
+        }
+
+        void lock (
+                void)
+        {
+            while (flag.test_and_set (std::memory_order_acquire))
+            {
+            }
+        }
+
+        void unlock (
+                void)
+        {
+            flag.clear ();
+        }
+    };
+
 public:
     class server_client_class;
     typedef void (*server_routine)(server_client_class*);
@@ -15,17 +46,16 @@ public:
     private:
         int accept_fd;
         server_routine p_routine;
-        //pthread_t thread;
-        unsigned int write_timeout;
-        unsigned int read_timeout;
+        bool is_client_running;
+        std::thread m_worker_thread;
+
+        void run (
+                void);
 
     public:
         server_client_class (
                 server_routine p_func,
                 int fd);
-
-        void run (
-                void);
 
         int recv_message (
                 unsigned char** buffer,
@@ -35,12 +65,18 @@ public:
                 const unsigned char* p_buffer,
                 const unsigned int size);
 
+        inline bool is_running (
+                void)
+        {
+            return is_client_running;
+        }
+
         ~server_client_class (
                 void);
     };
 
 private:
-    enum socket_state
+    enum socket_state_t
     {
         //ready_to_create,
         ready_to_bind,
@@ -48,23 +84,23 @@ private:
         ready_to_close
     };
 
-
 private:
     int socket_fd;
-    unsigned int listen_queue;
-
-    long listener;
-    server_client_class* client_class;
-    socket_state state;
     unsigned int mi_port_number;
     server_routine mp_func;
+
+    socket_state_t state;
+    std::thread m_worker_thread;
+
+    std::list <server_client_class*> m_clients;
+    spinlock_class m_clients_spinlock;
 
 private:
     int bind_on_server (
             void);
 
-    static void* task1 (
-            void* p_huj);
+    void working_thread (
+            void);
 
     int bind_and_listen (
             void);
@@ -72,11 +108,8 @@ private:
     int accept_client (
             void);
 
-    int add_client_to_list (
-            int accept_fd);
-
-    int remove_finished (
-            void);
+    void remove_finished (
+            int is_time_to_close);
 
 public:
     server_socket_class (

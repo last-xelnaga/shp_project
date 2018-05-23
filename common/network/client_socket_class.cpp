@@ -8,7 +8,12 @@
 #include <unistd.h>
 
 
-static int connect_to_server (
+#define CONNECT_RETRY_COUNT         3
+#define CONNECT_RETRY_DELAY         2
+#define SOCKET_WRITE_TIMEOUT        10
+#define SOCKET_READ_TIMEOUT         60
+
+int client_socket_class::connect_to_server (
         const int fd,
         const char* p_server_name,
         const unsigned int port_number)
@@ -42,12 +47,19 @@ static int connect_to_server (
 
     if (result == 0)
     {
-        int res = connect (fd, (struct sockaddr*)&socket_address, sizeof (sockaddr_in));
+        int res = ::connect (fd, (struct sockaddr*)&socket_address, sizeof (sockaddr_in));
         if (res < 0)
         {
             DEBUG_LOG_ERROR ("connect call failed: %s", strerror (errno));
             result = -1;
         }
+    }
+
+    //TODO
+    if (result == 0)
+    {
+        //int syn_packets = 2;
+        //setsockopt (fd, IPPROTO_TCP, TCP_SYNCNT, &syn_packets, sizeof (syn_packets));
     }
 
     return result;
@@ -56,11 +68,6 @@ static int connect_to_server (
 client_socket_class::client_socket_class (
         void)
 {
-    connect_retry_sleep = 2;
-    try_count_max = 3;
-
-    write_timeout = 10;
-    read_timeout = 60;
 }
 
 int client_socket_class::connect (
@@ -83,7 +90,7 @@ int client_socket_class::connect (
     if (result == 0)
     {
         result = -1;
-        unsigned int try_count = try_count_max;
+        unsigned int try_count = CONNECT_RETRY_COUNT;
 
         while (result != 0 && try_count)
         {
@@ -101,7 +108,7 @@ int client_socket_class::connect (
                 else
                 {
                     // give it an another chance
-                    sleep (connect_retry_sleep);
+                    sleep (CONNECT_RETRY_DELAY);
                 }
             }
         }
@@ -136,17 +143,17 @@ int client_socket_class::send_and_receive (
 
     if (result == 0)
     {
-        result = send_data (socket_fd, (unsigned char*)&size, sizeof (int), write_timeout);
+        result = send_data (socket_fd, (unsigned char*)&size, sizeof (int), SOCKET_WRITE_TIMEOUT);
     }
 
     if (result == 0)
     {
-        result = send_data (socket_fd, p_buffer, size, write_timeout);
+        result = send_data (socket_fd, p_buffer, size, SOCKET_WRITE_TIMEOUT);
     }
 
     if (result == 0)
     {
-        result = recv_data (socket_fd, (unsigned char*) answer_size, sizeof (int), read_timeout);
+        result = recv_data (socket_fd, (unsigned char*) answer_size, sizeof (int), SOCKET_READ_TIMEOUT);
     }
 
     if (result == 0)
@@ -156,7 +163,7 @@ int client_socket_class::send_and_receive (
 
     if (result == 0)
     {
-        result = recv_data (socket_fd, *p_answer, *answer_size, read_timeout);
+        result = recv_data (socket_fd, *p_answer, *answer_size, SOCKET_READ_TIMEOUT);
     }
 
     return result;
@@ -177,3 +184,4 @@ client_socket_class::~client_socket_class (
 {
     client_socket_class::close ();
 }
+

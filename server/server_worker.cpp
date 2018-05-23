@@ -54,7 +54,7 @@ int process_message (
     json::value type = json ["type"];
     std::string type_str = stringify (type, json::ESCAPE_UNICODE);
 
-    DEBUG_LOG_INFO ("got new message, type %s", type_str.c_str ());
+    DEBUG_LOG_INFO ("new %s message", type_str.c_str ());
 
     if (type_str == "\"dht\"")
     {

@@ -23,6 +23,8 @@ void exit_function (
 int main (
         void)
 {
+    DEBUG_LOG_INFO ("starting...");
+
     signal (SIGINT, exit_function);
 
     server_socket_class server_socket;

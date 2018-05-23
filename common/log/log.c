@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdarg.h>
+#include <time.h>
 
 #define MAX_LOG_MSG_SIZE            1024
 
@@ -21,9 +22,13 @@ void debug_log_print (
     if (prio == LOG_INFO)
         prio_letter [0] = 'I';
 
+    time_t now = time (NULL);
+    struct tm* tm = localtime (&now);
+
     // organize the prefix
     if (p_file_name != NULL)
-        snprintf (buffer, MAX_LOG_MSG_SIZE, "%s:%s  %s:%d\t", p_tag, prio_letter,
+        snprintf (buffer, MAX_LOG_MSG_SIZE, "[%02d:%02d:%02d] %s:%s  %s:%d\t",
+                tm->tm_hour, tm->tm_min, tm->tm_sec, p_tag, prio_letter,
                 p_file_name, line);
     else
         snprintf (buffer, MAX_LOG_MSG_SIZE, "%s:%s\t", p_tag, prio_letter);

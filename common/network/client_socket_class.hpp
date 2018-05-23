@@ -9,11 +9,10 @@ class client_socket_class
 private:
     int socket_fd;
 
-    unsigned int connect_retry_sleep;
-    unsigned int try_count_max;
-
-    unsigned int write_timeout;
-    unsigned int read_timeout;
+    int connect_to_server (
+            const int fd,
+            const char* p_server_name,
+            const unsigned int port_number);
 
 public:
     client_socket_class (

@@ -5,8 +5,11 @@
 
 #include <errno.h>
 #include <netinet/in.h>
-#include <pthread.h>
 #include <unistd.h>
+
+#define SOCKET_WRITE_TIMEOUT        10
+#define SOCKET_READ_TIMEOUT         60
+#define SOCKET_QUEUE                5
 
 
 server_socket_class::server_client_class::server_client_class (
@@ -16,14 +19,16 @@ server_socket_class::server_client_class::server_client_class (
     accept_fd = fd;
     p_routine = p_func;
 
-    write_timeout = 10;
-    read_timeout = 60;
+    is_client_running = true;
+
+    m_worker_thread = std::thread (&server_socket_class::server_client_class::run, this);
 }
 
 void server_socket_class::server_client_class::run (
         void)
 {
     p_routine (this);
+    is_client_running = false;
 }
 
 int server_socket_class::server_client_class::recv_message (
@@ -34,7 +39,7 @@ int server_socket_class::server_client_class::recv_message (
 
     if (result == 0)
     {
-        result = recv_data (accept_fd, (unsigned char*) size, sizeof (int), read_timeout);
+        result = recv_data (accept_fd, (unsigned char*) size, sizeof (int), SOCKET_READ_TIMEOUT);
     }
 
     if (result == 0)
@@ -46,7 +51,7 @@ int server_socket_class::server_client_class::recv_message (
     {
         if (*size)
         {
-            result = recv_data (accept_fd, *buffer, *size, read_timeout);
+            result = recv_data (accept_fd, *buffer, *size, SOCKET_READ_TIMEOUT);
         }
     }
 
@@ -63,12 +68,12 @@ int server_socket_class::server_client_class::send_message (
     {
         unsigned char* p_data = (unsigned char*)&size;
         unsigned int data_length = sizeof (int);
-        result = send_data (accept_fd, p_data, data_length, write_timeout);
+        result = send_data (accept_fd, p_data, data_length, SOCKET_WRITE_TIMEOUT);
     }
 
     if (result == 0)
     {
-        result = send_data (accept_fd, p_buffer, size, write_timeout);
+        result = send_data (accept_fd, p_buffer, size, SOCKET_WRITE_TIMEOUT);
     }
 
     return result;
@@ -82,14 +87,16 @@ server_socket_class::server_client_class::~server_client_class (
         close (accept_fd);
     }
     accept_fd = -1;
+
+    m_worker_thread.join ();
 }
 
-void* server_socket_class::task1 (
-        void* p_huj)
+void server_socket_class::working_thread (
+        void)
 {
-    server_socket_class* p_server = (server_socket_class*)p_huj;
+    server_socket_class* p_server = this;
 
-    char is_time_close = 0;
+    int is_time_to_close = 0;
 
     do {
         switch (p_server->state)
@@ -101,13 +108,14 @@ void* server_socket_class::task1 (
                 p_server->accept_client ();
                 break;
             case ready_to_close:
-                is_time_close = 1;
+                is_time_to_close = 1;
                 break;
         }
-    } while (!is_time_close);
+
+        p_server->remove_finished (is_time_to_close);
+    } while (!is_time_to_close);
 
     DEBUG_LOG_INFO ("end the accept loop");
-    return NULL;
 }
 
 int server_socket_class::bind_on_server (
@@ -152,7 +160,7 @@ int server_socket_class::bind_on_server (
 
     if (result == 0)
     {
-        int res = listen (socket_fd, listen_queue);
+        int res = listen (socket_fd, SOCKET_QUEUE);
         if (res < 0)
         {
             DEBUG_LOG_ERROR ("listen call failed: %s", strerror (errno));
@@ -167,11 +175,8 @@ server_socket_class::server_socket_class (
         void)
 {
     socket_fd = -1;
-    listen_queue = 5;
     state = ready_to_bind;
     mi_port_number = 0;
-
-    client_class = nullptr;
 }
 
 int server_socket_class::start (
@@ -186,13 +191,16 @@ int server_socket_class::start (
         result = -1;
     }
 
-mi_port_number = port_number;
-mp_func = p_func;
+    if (result == 0)
+    {
+        mi_port_number = port_number;
+        mp_func = p_func;
+    }
 
     // make a clean up if needed
     if (result == 0)
     {
-        pthread_create ((pthread_t*)&listener, NULL, task1, (void*)this);
+        m_worker_thread = std::thread (&server_socket_class::working_thread, this);
     }
 
     return result;
@@ -234,6 +242,8 @@ int server_socket_class::bind_and_listen (
 int server_socket_class::accept_client (
         void)
 {
+    DEBUG_LOG_INFO ("accept_client start");
+
     int result = 0;
     int accept_fd = -1;
 
@@ -261,32 +271,49 @@ int server_socket_class::accept_client (
 
     if (result == 0)
     {
-        add_client_to_list (accept_fd);
+        DEBUG_LOG_INFO ("register new client");
+
+        server_client_class* p_client_class = new server_client_class (mp_func, accept_fd);
+
+        // grab the lock
+        m_clients_spinlock.lock ();
+
+        m_clients.push_back (p_client_class);
+
+        // relaase the lock
+        m_clients_spinlock.unlock ();
     }
+
+    DEBUG_LOG_INFO ("accepr client finish");
 
     return result;
 }
 
-int server_socket_class::add_client_to_list (
-        int accept_fd)
+void server_socket_class::remove_finished (
+        int is_time_to_close)
 {
-    DEBUG_LOG_INFO ("register new client");
+    // grab the lock
+    m_clients_spinlock.lock ();
 
-    remove_finished ();
+    if (m_clients.size () != 0)
+    {
+        // iterate through all clients
+        auto it = m_clients.begin ();
+        while (it != m_clients.end ())
+        {
+            if (is_time_to_close == 1 || (*it)->is_running () == false)
+            {
+                delete (*it);
+                m_clients.erase (it ++);
+                DEBUG_LOG_INFO ("client erased");
+            }
+            else
+                ++ it;
+        }
+    }
 
-    client_class = new server_client_class (mp_func, accept_fd);
-    client_class->run ();
-
-    return 0;
-}
-
-int server_socket_class::remove_finished (
-        void)
-{
-    if (client_class != nullptr)
-        delete client_class;
-
-    return 0;
+    // relaase the lock
+    m_clients_spinlock.unlock ();
 }
 
 void server_socket_class::terminate (
@@ -296,17 +323,14 @@ void server_socket_class::terminate (
 
     DEBUG_LOG_INFO ("waiting for join");
     shutdown (socket_fd, 0);
-    pthread_join(listener, NULL);
+    m_worker_thread.join ();
     DEBUG_LOG_INFO ("joined");
-    listener = -1;
 
     if (socket_fd >= 0)
     {
         close (socket_fd);
     }
     socket_fd = -1;
-
-    remove_finished ();
 }
 
 server_socket_class::~server_socket_class (
