@@ -3,4 +3,5 @@ access_token
 priv_key.pem
 service-account.json
 shp_server
+xelnaga_ami_data
 xelnaga_ami_key.pem
