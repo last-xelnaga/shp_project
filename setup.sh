@@ -78,8 +78,11 @@ if [ ! -d $curl ]; then
     cd $curl
     ./configure --enable-shared=no --without-zlib --without-librtmp --disable-ipv6 --disable-unix-sockets \
     --disable-smtp --disable-smb --disable-imap --disable-pop3 --disable-rtsp --disable-telnet --disable-ldaps \
-    --disable-ldap --disable-ftp --disable-gopher --disable-dict --disable-tftp --with-ssl=$openssl/install
+    --disable-ldap --disable-ftp --disable-gopher --disable-dict --disable-tftp --disable-sspi --without-winidn \
+    --without-libidn2 --without-nghttp2 --without-libmetalink --without-libpsl --without-nss --disable-ntlm-wb \
+    --without-libssh2 --prefix=$curl/install --with-ssl=$openssl/install
     make all
+    make install
     cd $root
 else
     info "curl already in place, skipping ..."
