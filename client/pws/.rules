@@ -1,11 +1,12 @@
+
 PREFIX	=
 
 -include makefile.prefix
 
-TARGET = shp_client2
+TARGET = shp_client
 FLAGS = -O0 -g -ggdb
 
-OBJDIR = $(shell pwd)/obj
+OBJDIR = $(shell pwd)/pws/obj
 INC =
 LIB =
 
@@ -18,7 +19,14 @@ endif
 
 SRCCPP := \
     main.cpp \
+    network_manager_class.cpp \
+    settings_class.cpp
 
+SRCC := \
+    sensors.c
+
+VPATH += \
+    src:./pws
 
 # sources
 include ../common/log/.rules
@@ -31,5 +39,7 @@ include ../common/build/.rules
 # dependencies
 include ../common/log/.debs
 include ../common/network/.debs
-$(OBJDIR)/main.o: log.h Makefile
-
+$(OBJDIR)/main.o: network_manager_class.hpp log.h sensors.h settings_class.hpp Makefile
+$(OBJDIR)/network_manager_class.o: client_socket_class.hpp log.h network_manager_class.hpp settings_class.hpp Makefile
+$(OBJDIR)/sensors.o: log.h sensors.h Makefile
+$(OBJDIR)/settings_class.o: file.h log.h settings_class.hpp Makefile

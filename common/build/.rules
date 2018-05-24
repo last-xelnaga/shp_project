@@ -3,7 +3,7 @@ C  = $(PREFIX)gcc
 CC = $(PREFIX)g++
 
 CFLAGS   = $(FLAGS) -DDEBUG_TAG="$(TARGET)" -Wall -Wextra -std=c99
-CXXFLAGS = $(FLAGS) -DDEBUG_TAG="$(TARGET)" -Wall -Wextra -std=c++0x
+CXXFLAGS = $(FLAGS) -DDEBUG_TAG="$(TARGET)" -pedantic -Wextra -Wall -std=c++11
 
 
 OBJC = $(SRCC:%.c=$(OBJDIR)/%.o)
