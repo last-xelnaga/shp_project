@@ -1,11 +1,22 @@
 
 TARGET = shp_server
-FLAGS = -O0 -g -ggdb
+FLAGS = -O0 -g3 -ggdb
 #CFLAGS	+= -O2 -fno-omit-frame-pointer
 
 OBJDIR = $(shell pwd)/obj
-INC = -I. -I./../external/cpp-json/include
-LIB = -lcurl -lssl -lcrypto
+INC = -I.
+LIB =
+
+# add cpp-json support
+INC += -I./../external/cpp-json/include
+
+# add static curl
+INC += -I../external/curl-7.54.0/include
+LIB += -L../external/curl-7.54.0/lib/.libs -l:libcurl.a
+
+# add static openssl
+INC += -I../external/openssl-1.1.0e/install/include
+LIB += -L../external/openssl-1.1.0e/install/lib -l:libssl.a -l:libcrypto.a -ldl
 
 SRCCPP := \
     fcm_messaging_class.cpp \
@@ -30,5 +41,6 @@ $(OBJDIR)/server_worker.o: fcm_messaging_class.hpp log.h server_socket_class.hpp
 
 .PHONY: deploy
 
-deploy:
+deploy: all
+	strip $(TARGET)
 	./deploy_to_aws.sh

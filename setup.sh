@@ -18,17 +18,17 @@ function error()
 
 # workspace setup
 root=$(pwd)
-external=$root/external
-jsonlib=$external/cpp-json
-wiringPi=$external/wiringPi
-tools=$external/tools
+
 
 # create external dir
+external=$root/external
 if [ ! -d $external ]; then
     mkdir -vp external
 fi
 
+
 # get cpp-json
+jsonlib=$external/cpp-json
 if [ ! -d $jsonlib ]; then
     cd $external
     git clone https://github.com/eteran/cpp-json.git
@@ -37,11 +37,57 @@ if [ ! -d $jsonlib ]; then
     fi
     cd $root
 else
-    info "cpp-json already in place, skipping..."
+    info "cpp-json already in place, skipping ..."
+fi
+
+
+# get openssl
+openssl=$external/openssl-1.1.0e
+if [ ! -d $openssl ]; then
+    cd $external
+    wget -c https://www.openssl.org/source/openssl-1.1.0e.tar.gz
+    if [ "$?" -ne "0" ]; then
+        error "failed to get download openssl"
+    fi
+
+    tar -xzvf openssl-1.1.0e.tar.gz
+    rm openssl-1.1.0e.tar.gz
+
+    cd $openssl
+    ./Configure --prefix=$openssl/install no-zlib no-weak-ssl-ciphers no-unit-test no-md2 linux-x86_64
+    make all
+    make install
+    cd $root
+else
+    info "openssl already in place, skipping ..."
+fi
+
+
+# get curl
+curl=$external/curl-7.54.0
+if [ ! -d $curl ]; then
+    cd $external
+    wget -c https://github.com/curl/curl/releases/download/curl-7_54_0/curl-7.54.0.tar.gz
+    if [ "$?" -ne "0" ]; then
+        error "failed to get download curl"
+    fi
+
+    tar -xzvf curl-7.54.0.tar.gz
+    rm curl-7.54.0.tar.gz
+
+    cd $curl
+    ./configure --enable-shared=no --without-zlib --without-librtmp --disable-ipv6 --disable-unix-sockets \
+    --disable-smtp --disable-smb --disable-imap --disable-pop3 --disable-rtsp --disable-telnet --disable-ldaps \
+    --disable-ldap --disable-ftp --disable-gopher --disable-dict --disable-tftp --with-ssl=$openssl/install
+    make all
+    cd $root
+else
+    info "curl already in place, skipping ..."
 fi
 
 
 # check the machine architecture
+tools=$external/tools
 arch=$(uname --machine)
 if [ $arch == "x86_64" ]; then
     info "you are using x86 ($arch) architecture"
@@ -60,14 +106,14 @@ if [ $arch == "x86_64" ]; then
                 error "failed to get tools"
             fi
 
-            info "checkout old but stable version..."
+            info "checkout old but stable version ..."
             cd $tools
             git checkout 3a413ca2b23fd275e8ddcc34f3f9fc3a4dbc723f
             if [ "$?" -ne "0" ]; then
                 error "failed to checkout"
             fi
         else
-            info "tools already in place, skipping..."
+            info "tools already in place, skipping ..."
         fi
 
         info "create makefile.prefix ..."
@@ -79,7 +125,9 @@ if [ $arch == "x86_64" ]; then
     fi
 fi
 
+
 # get wiringPi
+wiringPi=$external/wiringPi
 if [ ! -d $wiringPi ]; then
     cd $external
     git clone git://git.drogon.net/wiringPi
@@ -98,5 +146,5 @@ if [ ! -d $wiringPi ]; then
     make static
     cd $root
 else
-    info "wiringPi already in place, skipping..."
+    info "wiringPi already in place, skipping ..."
 fi
