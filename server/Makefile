@@ -10,13 +10,13 @@ LIB =
 # add cpp-json support
 INC += -I./../external/cpp-json/include
 
-# add static openssl
-INC += -I../external/openssl-1.1.0e/install/include
-LIB += -L../external/openssl-1.1.0e/install/lib -lssl -lcrypto -ldl
-
 # add static curl
 INC += -I../external/curl-7.54.0/install/include
-LIB += -L../external/curl-7.54.0/install/lib -lcurl
+LIB += -L../external/curl-7.54.0/install/lib -l:libcurl.a
+
+# add static openssl
+INC += -I../external/openssl-1.1.0e/install/include
+LIB += -L../external/openssl-1.1.0e/install/lib -l:libssl.a -l:libcrypto.a -ldl
 
 SRCCPP := \
     fcm_messaging_class.cpp \

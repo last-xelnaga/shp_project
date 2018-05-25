@@ -23,8 +23,11 @@ function copy_to_aws()
     scp -i $AWS_HOST_CERT $FILE_NAME $AWS_HOST_USER@$AWS_HOST_NAME:$AWS_HOST_PATH/$FILE_NAME
 }
 
+echo
 info "copy file to aws"
 copy_to_aws shp_server
 copy_to_aws service-account.json
 
-#ssh -v -i $AWS_HOST_CERT $AWS_HOST_USER@$AWS_HOST_NAME
+echo
+info "use command to connect to the server:"
+echo "ssh -v -i $AWS_HOST_CERT $AWS_HOST_USER@$AWS_HOST_NAME"
