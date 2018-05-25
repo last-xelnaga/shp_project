@@ -4,6 +4,7 @@
 #include "socket_common.h"
 
 #include <errno.h>
+#include <linux/tcp.h>
 #include <netdb.h>
 #include <unistd.h>
 
@@ -12,6 +13,7 @@
 #define CONNECT_RETRY_DELAY         2
 #define SOCKET_WRITE_TIMEOUT        10
 #define SOCKET_READ_TIMEOUT         60
+#define SOCKET_ADD_SYN_COUNT        1
 
 int client_socket_class::connect_to_server (
         const int fd,
@@ -55,13 +57,6 @@ int client_socket_class::connect_to_server (
         }
     }
 
-    //TODO
-    if (result == 0)
-    {
-        //int syn_packets = 2;
-        //setsockopt (fd, IPPROTO_TCP, TCP_SYNCNT, &syn_packets, sizeof (syn_packets));
-    }
-
     return result;
 }
 
@@ -84,6 +79,12 @@ int client_socket_class::connect (
             DEBUG_LOG_ERROR ("socket call failed: %s", strerror (errno));
             result = -1;
         }
+    }
+
+    if (result == 0)
+    {
+        int syn_packets = SOCKET_ADD_SYN_COUNT;
+        result = setsockopt (socket_fd, IPPROTO_TCP, TCP_SYNCNT, &syn_packets, sizeof (syn_packets));
     }
 
     // connect
@@ -184,4 +185,3 @@ client_socket_class::~client_socket_class (
 {
     client_socket_class::close ();
 }
-
