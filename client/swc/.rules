@@ -3,7 +3,7 @@ PREFIX	=
 
 -include makefile.prefix
 
-TARGET = shp_client2
+TARGET = swc/shp_client2
 FLAGS = -O0 -g -ggdb
 
 OBJDIR = $(shell pwd)/swc/obj
