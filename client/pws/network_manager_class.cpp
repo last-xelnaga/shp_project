@@ -52,7 +52,7 @@ void network_manager_class::process_batch (
     }
 
     client_socket_class socket_client;
-    int status = socket_client.connect (settings_class::get_instance ().get_server_name ().c_str (),
+    int status = socket_client.open_connection (settings_class::get_instance ().get_server_name ().c_str (),
             settings_class::get_instance ().get_server_port ());
 
     if (status == 0)
@@ -89,7 +89,7 @@ void network_manager_class::process_batch (
         // we have finished our work with queue
         pthread_mutex_unlock (&queue_mutex);
 
-        socket_client.close ();
+        socket_client.close_connection ();
     }
 
     server_last_connection_time = time (NULL);

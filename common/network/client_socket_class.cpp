@@ -9,50 +9,89 @@
 #include <unistd.h>
 
 
-#define CONNECT_RETRY_COUNT         3
-#define CONNECT_RETRY_DELAY         2
 #define SOCKET_WRITE_TIMEOUT        10
 #define SOCKET_READ_TIMEOUT         60
 #define SOCKET_ADD_SYN_COUNT        1
 
+void parse_url (
+        const std::string proxy,
+        std::string& host_name,
+        unsigned int& host_port)
+{
+    int offset = 0;
+
+    // check the protocol
+    offset = offset == 0 && proxy.compare (0, 8, "https://") == 0 ? 8 : offset;
+    offset = offset == 0 && proxy.compare (0, 7, "http://" ) == 0 ? 7 : offset;
+
+    // look for port delimeter
+    size_t port_pos = proxy.find_first_of (':', offset + 1 );
+    host_name = port_pos == std::string::npos ? proxy.substr (offset) : proxy.substr (offset, port_pos - offset);
+    host_port = std::stoi (port_pos == std::string::npos ? offset == 7 ? "80" : "443" : proxy.substr (port_pos + 1));
+
+    DEBUG_LOG_INFO ("host %s:%d", host_name.c_str (), host_port);
+}
+
 int client_socket_class::connect_to_server (
-        const int fd,
-        const char* p_server_name,
-        const unsigned int port_number)
+        void)
 {
     int result = 0;
-    struct hostent* p_host = NULL;
     struct sockaddr_in socket_address;
 
-    if (fd < 0)
+    if (proxy_name.size ())
     {
-        DEBUG_LOG_ERROR ("invalid socket param");
-        result = -1;
+        proxy_payload = "CONNECT " + server_name + ":" + std::to_string (mi_port_number) + " HTTP/1.0\n\n";
+        parse_url (proxy_name, server_name, mi_port_number);
     }
 
+    DEBUG_LOG_INFO ("server_name %s", server_name.c_str ());
+    
     if (result == 0)
     {
-        p_host = gethostbyname (p_server_name);
+        socket_address.sin_family = AF_INET;
+        socket_address.sin_port = htons (mi_port_number);
+
+        struct hostent* p_host = gethostbyname (server_name.c_str ());
         if (p_host == NULL)
         {
             DEBUG_LOG_ERROR ("gethostbyname call failed: %s", strerror (errno));
             result = -1;
         }
+        else
+        {
+            memcpy ((char*)&socket_address.sin_addr, p_host->h_addr, p_host->h_length);
+        }
     }
 
     if (result == 0)
     {
-        memcpy ((char*)&socket_address.sin_addr, p_host->h_addr, p_host->h_length);
-        socket_address.sin_family = AF_INET;
-        socket_address.sin_port = htons (port_number);
-    }
-
-    if (result == 0)
-    {
-        int res = ::connect (fd, (struct sockaddr*)&socket_address, sizeof (sockaddr_in));
+        int res = connect (socket_fd, (struct sockaddr*)&socket_address, sizeof (sockaddr_in));
         if (res < 0)
         {
             DEBUG_LOG_ERROR ("connect call failed: %s", strerror (errno));
+            result = -1;
+        }
+    }
+
+    if (result == 0 && proxy_name.size ())
+    {
+        char p_answer [1024] = { 0 };
+        unsigned int answer_size = sizeof (p_answer);
+
+        send (socket_fd, proxy_payload.c_str (), proxy_payload.size (), 0);
+        int received = recv (socket_fd, p_answer, answer_size, 0);
+        if (received > 12)
+        {
+            p_answer [12] = 0;
+            if (strcmp (p_answer, "HTTP/1.1 200") != 0)
+            {
+                DEBUG_LOG_ERROR ("proxy said %s", p_answer);
+                result = -1;
+            }
+        }
+        else
+        {
+            DEBUG_LOG_ERROR ("connect to proxy failed");
             result = -1;
         }
     }
@@ -63,14 +102,28 @@ int client_socket_class::connect_to_server (
 client_socket_class::client_socket_class (
         void)
 {
+    socket_fd = -1;
 }
 
-int client_socket_class::connect (
+int client_socket_class::open_connection (
         const char* p_server_name,
         const unsigned int port_number)
 {
     int result = 0;
 
+    if (socket_fd > 0)
+    {
+        DEBUG_LOG_ERROR ("wrong socket state");
+        result = -1;
+    }
+
+    if (result == 0)
+    {
+        server_name = std::string (p_server_name);
+        mi_port_number = port_number;
+    }
+
+    // create socket
     if (result == 0)
     {
         socket_fd = socket (AF_INET, SOCK_STREAM, IPPROTO_IP);
@@ -81,38 +134,33 @@ int client_socket_class::connect (
         }
     }
 
+    // set SYN packets count for the connect retries
     if (result == 0)
     {
         int syn_packets = SOCKET_ADD_SYN_COUNT;
-        result = setsockopt (socket_fd, IPPROTO_TCP, TCP_SYNCNT, &syn_packets, sizeof (syn_packets));
+        int res = setsockopt (socket_fd, IPPROTO_TCP, TCP_SYNCNT, &syn_packets, sizeof (syn_packets));
+        if (res < 0)
+        {
+            DEBUG_LOG_ERROR ("setsockopt call failed: %s", strerror (errno));
+            result = -1;
+        }
+    }
+
+    // check for proxy
+    if (result == 0)
+    {
+        char* p_http_proxy = getenv ("http_proxy");
+        if (p_http_proxy != NULL)
+        {
+            DEBUG_LOG_INFO ("proxy: \"%s\"", p_http_proxy);
+            proxy_name = std::string (p_http_proxy);
+        }
     }
 
     // connect
     if (result == 0)
     {
-        result = -1;
-        unsigned int try_count = CONNECT_RETRY_COUNT;
-
-        while (result != 0 && try_count)
-        {
-            result = connect_to_server (socket_fd, p_server_name, port_number);
-            try_count --;
-
-            if (result != 0)
-            {
-                if (try_count == 0)
-                {
-                    // no attempts left
-                    DEBUG_LOG_ERROR ("connect failed. no attempts left");
-                    result = -1;
-                }
-                else
-                {
-                    // give it an another chance
-                    sleep (CONNECT_RETRY_DELAY);
-                }
-            }
-        }
+        result = connect_to_server ();
     }
 
     // set non-blocking mode
@@ -122,12 +170,10 @@ int client_socket_class::connect (
     }
 
     // make a clean up if needed
-    if (result != 0)
+    if (result < 0)
     {
         if (socket_fd >= 0)
-        {
-            ::close (socket_fd);
-        }
+            close (socket_fd);
         socket_fd = -1;
     }
 
@@ -170,12 +216,12 @@ int client_socket_class::send_and_receive (
     return result;
 }
 
-void client_socket_class::close (
+void client_socket_class::close_connection (
         void)
 {
-    if (socket_fd >= 0)
+    if (socket_fd != -1)
     {
-        ::close (socket_fd);
+        close (socket_fd);
     }
     socket_fd = -1;
 }
@@ -183,5 +229,5 @@ void client_socket_class::close (
 client_socket_class::~client_socket_class (
         void)
 {
-    client_socket_class::close ();
+    close_connection ();
 }

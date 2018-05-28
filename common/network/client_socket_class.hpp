@@ -2,23 +2,28 @@
 #ifndef SOCKET_CLIENT_HPP
 #define SOCKET_CLIENT_HPP
 
+#include <string>
+
 
 class client_socket_class
 {
-
 private:
     int socket_fd;
 
+    std::string server_name;
+    unsigned int mi_port_number;
+
+    std::string proxy_name;
+    std::string proxy_payload;
+
     int connect_to_server (
-            const int fd,
-            const char* p_server_name,
-            const unsigned int port_number);
+            void);
 
 public:
     client_socket_class (
             void);
 
-    int connect (
+    int open_connection (
             const char* p_server_name,
             const unsigned int port_number);
 
@@ -28,7 +33,7 @@ public:
             unsigned char** p_answer,
             unsigned int* answer_size);
 
-    void close (
+    void close_connection (
             void);
 
     ~client_socket_class (
