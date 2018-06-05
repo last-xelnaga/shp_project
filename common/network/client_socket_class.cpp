@@ -38,14 +38,16 @@ int client_socket_class::connect_to_server (
     int result = 0;
     struct sockaddr_in socket_address;
 
+    // prepare the proxy
+    proxy_payload = "CONNECT " + server_name + ":" + std::to_string (mi_port_number) + " HTTP/1.0\n\n";
+
     if (proxy_name.size ())
     {
-        proxy_payload = "CONNECT " + server_name + ":" + std::to_string (mi_port_number) + " HTTP/1.0\n\n";
         parse_url (proxy_name, server_name, mi_port_number);
     }
 
     DEBUG_LOG_INFO ("server_name %s", server_name.c_str ());
-    
+
     if (result == 0)
     {
         socket_address.sin_family = AF_INET;

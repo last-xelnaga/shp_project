@@ -42,6 +42,15 @@ int server_socket_class::server_client_class::recv_message (
         result = recv_data (accept_fd, (unsigned char*) size, sizeof (int), SOCKET_READ_TIMEOUT);
     }
 
+    if (result == 0 && *size > 1024)
+    {
+        unsigned int bad_size = *size;
+        DEBUG_LOG_ERROR ("message is malformed, size is: %d [%d %d %d %d]",
+                bad_size, (unsigned char)(bad_size & 0xff000000) >> 24, (unsigned char)(bad_size & 0xff0000) >> 16,
+                (unsigned char)(bad_size & 0xff00) >> 8, (unsigned char)(bad_size & 0xff));
+        result = -1;
+    }
+
     if (result == 0)
     {
         *buffer = new unsigned char [*size];
