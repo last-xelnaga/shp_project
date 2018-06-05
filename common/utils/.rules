@@ -3,9 +3,9 @@ INC += \
     -I../common/utils
 
 SRCC += \
-    base64.c \
-    file.c \
-    sha256.c \
+    file_utils.c \
+    sys_utils.c \
+    time_utils.c \
 
 VPATH += \
     src:../common/utils

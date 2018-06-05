@@ -12,26 +12,31 @@ LIB =
 
 ifeq ($(WIRING_LIB) , yes)
     FLAGS += -DUSE_WIRINGPI_LIB
-    INC += -I./../external/wiringPi/wiringPi
-    LIB += -L./../external/wiringPi/wiringPi/ -lwiringPi -lrt
 endif
 
 
 SRCCPP := \
     main.cpp \
 
+SRCC := \
+    sensors.c
+
 VPATH += \
     src:./swc
 
 # sources
 include ../common/log/.rules
-include ../common/network/.rules
+include ../common/sensors/.rules
+#include ../common/network/.rules
 include ../common/utils/.rules
 
 # global rules
 include ../common/build/.rules
 
 # dependencies
-include ../common/log/.debs
-include ../common/network/.debs
-$(OBJDIR)/main.o: log.h Makefile
+include ../common/log/.deps
+include ../common/sensors/.deps
+#include ../common/network/.deps
+include ../common/utils/.debs
+$(OBJDIR)/main.o: log.h .rules
+$(OBJDIR)/sensors.o: log.h sensors.h .rules

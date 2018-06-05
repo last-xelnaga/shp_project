@@ -191,8 +191,17 @@ static int is_data_crc_valid (
     }
     else
     {
-        DEBUG_LOG_INFO ("crc OK, hum %d %d, temp %d %d, crc %d (%d)",
-                p_data [0], p_data [1], p_data [2], p_data [3], p_data [4], crc);
+        double temp = p_data [0] * 10 + p_data [1];
+        temp /= 10;
+        temp -= 32;
+        temp *= 5;
+        temp /= 9;
+
+        double hum = p_data [2] * 10 + p_data [3];
+        hum /= 10;
+
+        DEBUG_LOG_INFO ("crc OK, temp %0.2f, hum %0.2f, crc %d (%d)",
+                temp, hum, p_data [4], crc);
     }
 
     return result;

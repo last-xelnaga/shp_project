@@ -1,6 +1,7 @@
 
-#include "client_socket_class.hpp"
+//#include "client_socket_class.hpp"
 #include "log.h"
+#include "sensors.h"
 
 #include <string>
 #include <time.h>
@@ -25,7 +26,7 @@ int main (
     DEBUG_LOG_INFO ("app start");
     signal (SIGINT, exit_function);
 
-    while (is_going_on)
+    /*while (is_going_on)
     {
         DEBUG_LOG_INFO ("new try...");
 
@@ -48,9 +49,40 @@ int main (
             status = socket_client.send_and_receive ((unsigned char*)evt_message.c_str (), evt_message.size () + 1,
                     &p_answer, &answer_size);
         }
- 
+
         sleep (2);
-    }           
+    }*/
+
+    if (is_going_on)
+        if (raspberry_board_setup ())
+            is_going_on = 0;
+
+    sensor_dht11_setup ();
+    sensor_relay_water_pump_setup ();
+    //liquid_level_setup ();
+
+    int count = 0;
+    while (is_going_on)
+    {
+        if (count == 0)
+        {
+            sensor_relay_water_pump_start ();
+
+            int hum = 0, temp = 0;
+            sensor_dht11_get_data (&temp, &hum);
+            DEBUG_LOG_INFO ("sensor_dht11_get_data %2.1f %%   %2.1f C", (float)hum / 10, (float)temp / 10);
+
+            sleep (1);
+            sensor_relay_water_pump_stop ();
+        }
+
+        //get_liquid_level ();
+        sleep (1);
+
+        count ++;
+        if (count == 5)
+            count = 0;
+    }
 
     DEBUG_LOG_INFO ("app exit");
     return 0;

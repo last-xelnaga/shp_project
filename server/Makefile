@@ -24,6 +24,7 @@ SRCCPP := \
     server_worker.cpp
 
 # sources
+include ../common/crypto/.rules
 include ../common/log/.rules
 include ../common/network/.rules
 include ../common/utils/.rules
@@ -32,10 +33,11 @@ include ../common/utils/.rules
 include ../common/build/.rules
 
 # dependencies
-include ../common/log/.debs
-include ../common/network/.debs
-include ../common/utils/.debs
-$(OBJDIR)/fcm_messaging_class.o: base64.h fcm_messaging_class.hpp file.h log.h sha256.h Makefile
+include ../common/crypto/.deps
+include ../common/log/.deps
+include ../common/network/.deps
+include ../common/utils/.deps
+$(OBJDIR)/fcm_messaging_class.o: base64.h fcm_messaging_class.hpp file_utils.h log.h sha256.h Makefile
 $(OBJDIR)/main.o: log.h server_socket_class.hpp server_worker.hpp Makefile
 $(OBJDIR)/server_worker.o: fcm_messaging_class.hpp log.h server_socket_class.hpp server_worker.hpp Makefile
 

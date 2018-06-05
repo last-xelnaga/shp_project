@@ -1,7 +1,9 @@
 // taken from https://www.mycplus.com/source-code/c-source-code/base64-encode-decode/
 
+#include "base64.h"
 #include <stdint.h>
 #include <stdlib.h>
+
 
 const unsigned char encoding_table [] =
 {

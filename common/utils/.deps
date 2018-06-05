@@ -1,0 +1,4 @@
+
+$(OBJDIR)/file_utils.o: file_utils.h log.h .rules
+$(OBJDIR)/sys_utils.o: sys_utils.h .rules
+$(OBJDIR)/time_util.o: time_util.h .rules

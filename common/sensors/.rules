@@ -1,0 +1,9 @@
+
+INC += \
+    -I../common/sensors
+
+SRCC += \
+    rpi_gpio.c
+
+VPATH += \
+    src:../common/sensors

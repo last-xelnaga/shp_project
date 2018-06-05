@@ -37,9 +37,10 @@ include ../common/utils/.rules
 include ../common/build/.rules
 
 # dependencies
-include ../common/log/.debs
-include ../common/network/.debs
-$(OBJDIR)/main.o: network_manager_class.hpp log.h sensors.h settings_class.hpp Makefile
-$(OBJDIR)/network_manager_class.o: client_socket_class.hpp log.h network_manager_class.hpp settings_class.hpp Makefile
-$(OBJDIR)/sensors.o: log.h sensors.h Makefile
-$(OBJDIR)/settings_class.o: file.h log.h settings_class.hpp Makefile
+include ../common/log/.deps
+include ../common/network/.deps
+include ../common/utils/.deps
+$(OBJDIR)/main.o: network_manager_class.hpp log.h sensors.h settings_class.hpp .rules
+$(OBJDIR)/network_manager_class.o: client_socket_class.hpp log.h network_manager_class.hpp settings_class.hpp .rules
+$(OBJDIR)/sensors.o: log.h sensors.h .rules
+$(OBJDIR)/settings_class.o: file_utils.h log.h settings_class.hpp .rules

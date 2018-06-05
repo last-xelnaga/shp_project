@@ -1,0 +1,2 @@
+
+$(OBJDIR)/rpi_gpio.o: rpi_gpio.h log.h .rules
