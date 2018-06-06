@@ -37,6 +37,6 @@ include ../common/build/.rules
 include ../common/log/.deps
 include ../common/sensors/.deps
 #include ../common/network/.deps
-include ../common/utils/.debs
-$(OBJDIR)/main.o: log.h .rules
-$(OBJDIR)/sensors.o: log.h sensors.h .rules
+include ../common/utils/.deps
+$(OBJDIR)/main.o: log.h sensors.h .rules
+$(OBJDIR)/sensors.o: log.h sensors.h rpi_gpio.h sys_utils.h time_utils.h .rules

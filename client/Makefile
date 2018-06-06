@@ -1,4 +1,10 @@
 
+.PHONY: all clean
+
+all : pws swc
+
+clean: pws_clean swc_clean
+
 .PHONY:  pws pws_deploy pws_clean
 
 pws:
@@ -18,10 +24,3 @@ swc:
 
 swc_clean:
 	make -f swc/.rules clean
-
-
-.PHONY: all clean
-
-all : pws swc
-
-clean: pws_clean swc_clean

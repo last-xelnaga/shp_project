@@ -41,9 +41,6 @@ unsigned char p_data [DATA_LENGTH];
 #define DHT_PULSES 41
 
 
-
-
-
 // wiringPi setup
 int raspberry_board_setup (
         void)
