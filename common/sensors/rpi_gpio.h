@@ -1,6 +1,6 @@
 
-#ifndef PI_2_MMIO_H
-#define PI_2_MMIO_H
+#ifndef RPI_GPI_H
+#define RPI_GPI_H
 
 
 #ifdef __cplusplus
@@ -14,7 +14,7 @@ extern "C" {
 #define	HIGH                1
 
 
-int gpio_base_init (
+int rpi_gpio_init (
         void);
 
 void set_pin_direction (
@@ -32,4 +32,4 @@ unsigned int get_bus_state (
 }
 #endif
 
-#endif // PI_2_MMIO_H
+#endif // RPI_GPI_H

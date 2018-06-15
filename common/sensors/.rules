@@ -3,7 +3,9 @@ INC += \
     -I../common/sensors
 
 SRCC += \
-    rpi_gpio.c
+    rpi_gpio.c \
+    rpi_spi.c \
+    sensor_dht22.c
 
 VPATH += \
     src:../common/sensors

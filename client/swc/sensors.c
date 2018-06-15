@@ -23,22 +23,22 @@
 #define RETRY_COUNT             3
 
 // dth output data size
-#define DATA_LENGTH             5
+//#define DATA_LENGTH             5
 // init macro
-#define INIT_DATA               p_data[0]=0;p_data[1]=0;p_data[2]=0;p_data[3]=0;p_data[4]=0;
+//#define INIT_DATA               p_data[0]=0;p_data[1]=0;p_data[2]=0;p_data[3]=0;p_data[4]=0;
 
-unsigned char p_data [DATA_LENGTH];
+//unsigned char p_data [DATA_LENGTH];
 
 // This is the only processor specific magic value, the maximum amount of time to
 // spin in a loop before bailing out and considering the read a timeout.  This should
 // be a high value, but if you're running on a much faster platform than a Raspberry
 // Pi or Beaglebone Black then it might need to be increased.
-#define DHT_MAXCOUNT 32000
+//#define DHT_MAXCOUNT 32000
 
 // Number of bit pulses to expect from the DHT.  Note that this is 41 because
 // the first pulse is a constant 50 microsecond pulse, with 40 pulses to represent
 // the data afterwards.
-#define DHT_PULSES 41
+//#define DHT_PULSES 41
 
 
 // wiringPi setup
@@ -56,7 +56,7 @@ int raspberry_board_setup (
 
     if (result == 0)
     {
-        if (gpio_base_init () == -1)
+        if (rpi_gpio_init () == -1)
         {
             DEBUG_LOG_ERROR ("gpio_base_init has failed");
             result = -1;
@@ -67,7 +67,7 @@ int raspberry_board_setup (
 
     return result;
 }
-
+/*
 // temperature and humidity sensor
 #ifdef USE_WIRINGPI_LIB
 static void read_data (
@@ -234,7 +234,7 @@ void sensor_dht11_get_data (
     if (p_data [2] & 0x80)
         *temperature *= -1;
 }
-
+*/
 // liquid_level sensor
 void liquid_level_setup (
         void)

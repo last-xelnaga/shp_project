@@ -16,11 +16,30 @@
 
 static unsigned int* p_gpio_base = NULL;
 
-int gpio_base_init (
+static int is_valid_rpi (
+        void)
+{
+    int result = 1;
+
+    // open cpuinfo
+    
+    
+    // check revision
+ 
+    return result;
+}
+
+int rpi_gpio_init (
         void)
 {
     if (p_gpio_base != NULL)
         return 0;
+
+    if (!is_valid_rpi ())
+    {
+        DEBUG_LOG_ERROR ("this board in not suitable for that app");
+        return -1;
+    }
 
     // peripheral addresses from device tree
     FILE* fp = fopen ("/proc/device-tree/soc/ranges", "rb");

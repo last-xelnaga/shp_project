@@ -11,12 +11,12 @@ int raspberry_board_setup (
         void);
 
 
-void sensor_dht11_setup (
+/*void sensor_dht11_setup (
         void);
 
 void sensor_dht11_get_data (
         int* temperature,
-        int* humidity);
+        int* humidity);*/
 
 
 void liquid_level_setup (

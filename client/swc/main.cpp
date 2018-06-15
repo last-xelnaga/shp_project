@@ -2,6 +2,8 @@
 //#include "client_socket_class.hpp"
 #include "log.h"
 #include "sensors.h"
+#include "sensor_dht22.h"
+
 
 #include <string>
 #include <time.h>
@@ -57,7 +59,7 @@ int main (
         if (raspberry_board_setup ())
             is_going_on = 0;
 
-    sensor_dht11_setup ();
+    //sensor_dht11_setup ();
     sensor_relay_water_pump_setup ();
     //liquid_level_setup ();
 
@@ -68,8 +70,9 @@ int main (
         {
             sensor_relay_water_pump_start ();
 
-            int hum = 0, temp = 0;
-            sensor_dht11_get_data (&temp, &hum);
+            unsigned int hum; int temp;
+            //sensor_dht11_get_data (&temp, &hum);
+            dht22_get_data (4, &hum, &temp);
             DEBUG_LOG_INFO ("sensor_dht11_get_data %2.1f %%   %2.1f C", (float)hum / 10, (float)temp / 10);
 
             sleep (1);
