@@ -4,7 +4,8 @@ PREFIX	=
 -include makefile.prefix
 
 TARGET = swc/shp_client2
-FLAGS = -O0 -g -ggdb
+#FLAGS = -O0 -g3 -ggdb
+FLAGS = -O2
 
 OBJDIR = $(shell pwd)/swc/obj
 INC =
@@ -18,7 +19,7 @@ endif
 SRCCPP := \
     main.cpp \
 
-SRCC := \
+#SRCC := \
     sensors.c
 
 VPATH += \
@@ -27,7 +28,6 @@ VPATH += \
 # sources
 include ../common/log/.rules
 include ../common/sensors/.rules
-#include ../common/network/.rules
 include ../common/utils/.rules
 
 # global rules
@@ -36,7 +36,5 @@ include ../common/build/.rules
 # dependencies
 include ../common/log/.deps
 include ../common/sensors/.deps
-#include ../common/network/.deps
 include ../common/utils/.deps
-$(OBJDIR)/main.o: log.h sensors.h .rules
-$(OBJDIR)/sensors.o: log.h sensors.h rpi_gpio.h sys_utils.h time_utils.h .rules
+$(OBJDIR)/main.o: log.h rpi_gpio.h rpi_spi.h sensor_buzzer.h sensor_dht22.h .rules

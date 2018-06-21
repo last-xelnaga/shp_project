@@ -7,12 +7,10 @@
 extern "C" {
 #endif
 
-
 int dht22_get_data (
         const unsigned int gpio_num,
         unsigned int* humidity,
         int* temperature);
-
 
 #ifdef __cplusplus
 }

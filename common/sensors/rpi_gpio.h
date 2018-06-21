@@ -7,19 +7,18 @@
 extern "C" {
 #endif
 
-#define	INPUT               0
-#define	OUTPUT              1
-
-#define	LOW                 0
-#define	HIGH                1
-
-
 int rpi_gpio_init (
         void);
+
+#define	INPUT               0
+#define	OUTPUT              1
 
 void set_pin_direction (
         const int gpio_number,
         const int direction);
+
+#define	LOW                 0
+#define	HIGH                1
 
 void set_pin_voltage (
         const int gpio_number,

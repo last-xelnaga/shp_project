@@ -1,15 +1,15 @@
 
 #include "sensor_dht22.h"
 #include "rpi_gpio.h"
-#include "sys_utils.h"
-#include "time_utils.h" 
+//#include "sys_utils.h"
+#include "time_utils.h"
 #include "log.h"
 
 
 // dth output data size
 #define DATA_LENGTH             5
 // init macro
-#define INIT_DATA               p_data[0]=0;p_data[1]=0;p_data[2]=0;p_data[3]=0;p_data[4]=0;
+//#define INIT_DATA               p_data[0]=0;p_data[1]=0;p_data[2]=0;p_data[3]=0;p_data[4]=0;
 
 unsigned char p_data [DATA_LENGTH];
 
@@ -37,7 +37,7 @@ static void read_data (
     // that it could stay in low-power-consumption mode
     set_pin_voltage (gpio_num, HIGH);
 
-
+sleep_milliseconds (20);
 
     // send 'start' command
     // pull the bus down
@@ -134,7 +134,7 @@ static int is_data_crc_valid (
     if (crc != p_data [4])
         result = 0;
 
-    DEBUG_LOG_INFO ("0x%x 0x%x 0x%x 0x%x 0x%x, crc %s",
+    DEBUG_LOG_INFO ("0x%02x 0x%02x 0x%02x 0x%02x 0x%02x, crc %s",
             p_data [0], p_data [1], p_data [2], p_data [3], p_data [4],
             result == 1 ? "OK" : "FAILED");
 
@@ -148,10 +148,18 @@ int dht22_get_data (
         unsigned int* humidity,
         int* temperature)
 {
+    for (int i = 0; i < 4; ++ i)
+        p_data [i] = 0;
+    p_data [4] = 1;
+
     //set_app_priority (PRIORITY_MAX);
     read_data (gpio_num);
     //set_app_priority (PRIORITY_DEFAULT);
-    is_data_crc_valid ();
+    if (!is_data_crc_valid ())
+    {
+        DEBUG_LOG_ERROR ("dht22 data crc failed");
+        return -1;
+    }
 
     *humidity = p_data [0];
     *humidity <<= 8;
@@ -165,6 +173,5 @@ int dht22_get_data (
     if (p_data [2] & 0x80)
         *temperature *= -1;
 
-
+    return 0;
 }
-

@@ -4,7 +4,8 @@ PREFIX	=
 -include makefile.prefix
 
 TARGET = pws/shp_client
-FLAGS = -O0 -g -ggdb
+#FLAGS = -O0 -g3 -ggdb
+FLAGS = -O2
 
 OBJDIR = $(shell pwd)/pws/obj
 INC =
@@ -12,8 +13,6 @@ LIB =
 
 ifeq ($(WIRING_LIB) , yes)
     FLAGS += -DUSE_WIRINGPI_LIB
-    INC += -I./../external/wiringPi/wiringPi
-    LIB += -L./../external/wiringPi/wiringPi/ -lwiringPi -lrt
 endif
 
 
@@ -22,15 +21,13 @@ SRCCPP := \
     network_manager_class.cpp \
     settings_class.cpp
 
-SRCC := \
-    sensors.c
-
 VPATH += \
     src:./pws
 
 # sources
 include ../common/log/.rules
 include ../common/network/.rules
+include ../common/sensors/.rules
 include ../common/utils/.rules
 
 # global rules
@@ -39,8 +36,8 @@ include ../common/build/.rules
 # dependencies
 include ../common/log/.deps
 include ../common/network/.deps
+include ../common/sensors/.deps
 include ../common/utils/.deps
-$(OBJDIR)/main.o: network_manager_class.hpp log.h sensors.h settings_class.hpp .rules
+$(OBJDIR)/main.o: network_manager_class.hpp rpi_gpio.h rpi_spi.h sensor_dht22.h log.h settings_class.hpp .rules
 $(OBJDIR)/network_manager_class.o: client_socket_class.hpp log.h network_manager_class.hpp settings_class.hpp .rules
-$(OBJDIR)/sensors.o: log.h sensors.h .rules
 $(OBJDIR)/settings_class.o: file_utils.h log.h settings_class.hpp .rules

@@ -5,6 +5,7 @@ INC += \
 SRCC += \
     rpi_gpio.c \
     rpi_spi.c \
+    sensor_buzzer.c \
     sensor_dht22.c
 
 VPATH += \

@@ -1,14 +1,21 @@
 
-//#include "client_socket_class.hpp"
 #include "log.h"
-#include "sensors.h"
+#include "rpi_gpio.h"
+#include "rpi_spi.h"
+#include "sensor_buzzer.h"
 #include "sensor_dht22.h"
 
-
-#include <string>
-#include <time.h>
 #include <signal.h>
 #include <unistd.h>
+
+// pump relay gpio
+#define SENSOR_RELAY_WATER_PUMP_GPIO    18 //4
+
+// dht22 temperature and humidity sensor gpio
+#define SENSOR_DHT22_GPIO               4 //6
+
+// dht22 temperature and humidity sensor gpio
+#define SENSOR_BUZZER_GPIO              23
 
 
 volatile sig_atomic_t is_going_on = 1;
@@ -22,61 +29,100 @@ void exit_function (
     is_going_on = 0;
 }
 
+// liquid_level sensor
+void liquid_level_setup (
+        void)
+{
+    DEBUG_LOG_INFO ("liquid_level_setup");
+}
+
+int get_liquid_level (
+        int* limit)
+{
+    DEBUG_LOG_INFO ("get_liquid_level");
+
+    *limit = 55;
+
+    /*char send_data [] = {0x01, 0x80, 0};
+    char buf [] = {0, 0, 0, 0, 0};
+
+    bcm2835_spi_transfernb (send_data, buf, sizeof (send_data));
+
+    int a2dVal = (buf[1]<< 8) & 0b1100000000;
+    a2dVal |=  (buf[2] & 0xff);
+    printf ("val %d, %d mm\n", a2dVal, int (.7095 * (752 - a2dVal)));*/
+
+    return 0;
+}
+
 int main (
         void)
 {
     DEBUG_LOG_INFO ("app start");
     signal (SIGINT, exit_function);
 
-    /*while (is_going_on)
+    if (geteuid () != 0)
     {
-        DEBUG_LOG_INFO ("new try...");
+        DEBUG_LOG_ERROR ("need to be root to run");
+        is_going_on = 0;
+    }
 
-        time_t now = time (NULL);
-
-        std::string evt_message = "{\n";
-        evt_message += "  \"client\" : \"pws\",\n";
-        //evt_message += "  \"evt_time\" : \"" + std::string (get_time_str (now)) + "\",\n";
-        evt_message += "  \"evt_time_unix\" : " + std::to_string (now) + ",\n";
-        evt_message += "  \"type\" : \"app_start\"\n";
-        evt_message += "}\n";
-
-        client_socket_class socket_client;
-        int status = socket_client.connect ("localhost",
-                5000);
-        if (status == 0)
+    // raspberry pi setup
+    #ifdef USE_WIRINGPI_LIB
+    if (is_going_on)
+    {
+        if (rpi_gpio_init () == -1)
         {
-            unsigned char* p_answer = NULL;
-            unsigned int answer_size = 0;
-            status = socket_client.send_and_receive ((unsigned char*)evt_message.c_str (), evt_message.size () + 1,
-                    &p_answer, &answer_size);
+            DEBUG_LOG_ERROR ("rpi_gpio_init has failed");
+            is_going_on = 0;
         }
-
-        sleep (2);
-    }*/
+    }
 
     if (is_going_on)
-        if (raspberry_board_setup ())
+    {
+        if (rpi_spi_init () == -1)
+        {
+            DEBUG_LOG_ERROR ("rpi_gpio_init has failed");
             is_going_on = 0;
+        }
+    }
 
-    //sensor_dht11_setup ();
-    sensor_relay_water_pump_setup ();
-    //liquid_level_setup ();
+    if (is_going_on)
+    {
+        set_pin_direction (SENSOR_RELAY_WATER_PUMP_GPIO, OUTPUT);
+        set_pin_voltage (SENSOR_RELAY_WATER_PUMP_GPIO, LOW);
+
+        liquid_level_setup ();
+    }
+    #endif // #ifdef USE_WIRINGPI_LIB
 
     int count = 0;
     while (is_going_on)
     {
         if (count == 0)
         {
-            sensor_relay_water_pump_start ();
+            // start the pump
+            #ifdef USE_WIRINGPI_LIB
+            set_pin_voltage (SENSOR_RELAY_WATER_PUMP_GPIO, HIGH);
+            #endif // #ifdef USE_WIRINGPI_LIB
 
+            // get the current temperature and humidity
             unsigned int hum; int temp;
-            //sensor_dht11_get_data (&temp, &hum);
-            dht22_get_data (4, &hum, &temp);
-            DEBUG_LOG_INFO ("sensor_dht11_get_data %2.1f %%   %2.1f C", (float)hum / 10, (float)temp / 10);
+            int status = dht22_get_data (SENSOR_DHT22_GPIO, &hum, &temp);
+            if (status == 0)
+                DEBUG_LOG_INFO ("sensor_dht11_get_data %2.1f %%   %2.1f C", (float)hum / 10, (float)temp / 10);
 
             sleep (1);
-            sensor_relay_water_pump_stop ();
+
+            // stop the pump
+            #ifdef USE_WIRINGPI_LIB
+            set_pin_voltage (SENSOR_RELAY_WATER_PUMP_GPIO, LOW);
+            #endif // #ifdef USE_WIRINGPI_LIB
+
+
+            buzzer_play_sound (SENSOR_BUZZER_GPIO, BUZZER_SHORT_BEEP);
+            //buzzer_play_sound (SENSOR_BUZZER_GPIO, BUZZER_LONG_BEEP);
+            //buzzer_play_sound (SENSOR_BUZZER_GPIO, BUZZER_TWO_SHORT_BEEPS);
         }
 
         //get_liquid_level ();

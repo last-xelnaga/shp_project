@@ -47,26 +47,29 @@ int process_message (
         const char* buffer)
 {
     int result = 0;
-    //DEBUG_LOG_INFO ("\n%s", buffer);
+    DEBUG_LOG_INFO ("\n%s", buffer);
 
     auto json = json::parse (buffer);
     json::value client = json ["client"];
     json::value type = json ["type"];
     std::string type_str = stringify (type, json::ESCAPE_UNICODE);
 
+    json::value status_str = json ["data"]["status"];
+    int status = to_number (status_str);
+
     DEBUG_LOG_INFO ("new %s message", type_str.c_str ());
 
     if (type_str == "\"dht\"")
     {
         //DEBUG_LOG_INFO ("temp");
-        json::value temp = json ["data"]["temp"];
-        int temperature = to_number (temp);
-
-        json::value hum = json ["data"]["hum"];
-        int humidity = to_number (hum);
-
-        if (temperature != 0)
+        if (status)
         {
+            json::value temp = json ["data"]["temp"];
+            int temperature = to_number (temp);
+
+            json::value hum = json ["data"]["hum"];
+            int humidity = to_number (hum);
+
             pws_client_data.temp__latest_value = temperature;
             pws_client_data.hum__latest_value = humidity;
             pws_client_data.temp__latest_time = time (NULL);
@@ -78,19 +81,16 @@ int process_message (
             pws_client_data.temp__errors_overall ++;
         }
     }
-    else if (type_str == "\"watering\"")
+    else if (type_str == "\"watering_stop\"")
     {
         //DEBUG_LOG_INFO ("pump");
-        json::value limit = json ["data"]["limit"];
-        pws_client_data.watering__water_level = to_number (limit);
-
-        json::value status = json ["data"]["status"];
-        std::string status_str = stringify (status, json::ESCAPE_UNICODE);
-
-
+        //std::string status_str = stringify (status, json::ESCAPE_UNICODE);
         std::string fcm_message_body;
-        if (status_str == "\"OK\"")
+        if (status)
         {
+            json::value limit = json ["data"]["limit"];
+            pws_client_data.watering__water_level = to_number (limit);
+
             pws_client_data.watering__latest_time = time (NULL);
             pws_client_data.watering__errors_streak = 0;
             fcm_message_body = "watering successful at\n" + to_string (json ["evt_time"]);
@@ -107,6 +107,10 @@ int process_message (
     else if (type_str == "\"app_start\"")
     {
         //DEBUG_LOG_INFO ("start");
+        if (status)
+        {
+
+        }
         pws_client_data.client__latest_reg_time = time (NULL);
         pws_client_data.client__regs_overall ++;
         pws_client_data.client__lookup_period_start = pws_client_data.client__latest_reg_time - 14 * 24 * 60 * 60;

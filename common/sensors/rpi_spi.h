@@ -7,26 +7,10 @@
 extern "C" {
 #endif
 
-#define	INPUT               0
-#define	OUTPUT              1
-
-#define	LOW                 0
-#define	HIGH                1
-
-
-int spi_init (
+int rpi_spi_init (
         void);
 
-//void set_pin_direction (
-//        const int gpio_number,
-//        const int direction);
-
-//void set_pin_voltage (
-//        const int gpio_number,
-//        const int level);
-
-//unsigned int get_bus_state (
-//        const int gpio_number);
+void bcm2835_spi_transfernb (char* tbuf, char* rbuf, unsigned int len);
 
 #ifdef __cplusplus
 }
