@@ -245,3 +245,36 @@ void bcm2835_spi_transfernb (char* tbuf, char* rbuf, unsigned int len)
     /* Set TA = 0, and also set the barrier */
     bcm2835_peri_set_bits(paddr, 0, BCM2835_SPI0_CS_TA);
 }
+
+int rpi_spi_mcp3008_read (
+        const unsigned char channel)
+{
+    int result;
+
+    //data [0] = 1;  //  first byte transmitted -> start bit
+    //data [1] = 0b10000000 |( ((a2dChannel & 7) << 4)); // second byte transmitted -> (SGL/DIF = 1, D2=D1=D0=0)
+    //data [2] = 0; // third byte transmitted....don't care
+
+    char send_data [3];
+
+    send_data [0] = 1;
+    send_data [1] = 0x80 | (((channel & 0x07) << 4));
+    send_data [2] = 0;
+
+    //char send_data [] = {0x01, 0x80, 0};
+    //char buf [] = {0, 0, 0, 0, 0};
+
+    bcm2835_spi_transfernb (send_data, send_data, sizeof (send_data));
+
+    result = send_data [1];
+    result &=  0x03;
+    result <<= 8;// & 0b1100000000; //merge data[1] & data[2] to get result
+    result |=  (send_data [2] & 0xff);
+    //printf ("val %d\n", result);
+
+    //int a2dVal = (buf[1]<< 8) & 0b1100000000;
+    //a2dVal |=  (buf[2] & 0xff);
+    //printf ("val %d, %d mm\n", a2dVal, int (.7095 * (752 - a2dVal)));
+
+    return result;
+}

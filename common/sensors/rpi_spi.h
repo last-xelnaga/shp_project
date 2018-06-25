@@ -1,4 +1,8 @@
 
+// http://www.hertaville.com/interfacing-an-spi-adc-mcp3008-chip-to-the-raspberry-pi-using-c.html
+// http://www.airspayce.com/mikem/bcm2835/index.html
+// https://github.com/MartinMiller/mcp3008lib-spi
+
 #ifndef RPI_SPI_H
 #define RPI_SPI_H
 
@@ -10,7 +14,8 @@ extern "C" {
 int rpi_spi_init (
         void);
 
-void bcm2835_spi_transfernb (char* tbuf, char* rbuf, unsigned int len);
+int rpi_spi_mcp3008_read (
+        const unsigned char channel);
 
 #ifdef __cplusplus
 }
