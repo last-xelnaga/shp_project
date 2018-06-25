@@ -115,7 +115,7 @@ void do_watering (
     if (status == 0)
     {
         message += ",\n";
-        message += "    \"limit\" : " + std::to_string (level) + "\n";
+        message += "    \"level\" : " + std::to_string (level) + "\n";
     }
     else
     {

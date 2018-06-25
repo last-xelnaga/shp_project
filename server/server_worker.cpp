@@ -88,7 +88,7 @@ int process_message (
         std::string fcm_message_body;
         if (status)
         {
-            json::value limit = json ["data"]["limit"];
+            json::value limit = json ["data"]["level"];
             pws_client_data.watering__water_level = to_number (limit);
 
             pws_client_data.watering__latest_time = time (NULL);
