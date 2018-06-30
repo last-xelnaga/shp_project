@@ -1,0 +1,49 @@
+
+C  = $(PREFIX)gcc
+CC = $(PREFIX)g++
+
+CFLAGS   = $(FLAGS) -DDEBUG_TAG="$(TARGET)" -pedantic -Wall -Wextra -std=c99
+CXXFLAGS = $(FLAGS) -DDEBUG_TAG="$(TARGET)" -pedantic -Wall -Wextra -std=c++11
+
+
+OBJC = $(SRCC:%.c=$(OBJDIR)/%.o)
+
+$(OBJDIR)/%.o :%.c
+	$(C) -c $(CFLAGS) $(INC) $< -o $@
+
+
+OBJCPP = $(SRCCPP:%.cpp=$(OBJDIR)/%.o)
+
+$(OBJDIR)/%.o :%.cpp
+	$(CC) -c $(CXXFLAGS) $(INC) $< -o $@
+
+.PHONY: all clean debug release profile deploy
+
+all: debug
+
+executable: $(OBJDIR) $(TARGET)
+
+debug: CFLAGS  += -O0 -g3 -ggdb -DDEBUG
+debug: CXXFLAGS += -O0 -g3 -ggdb -DDEBUG
+debug: executable
+
+release: clean
+release: CFLAGS += -O2
+release: CXXFLAGS += -O2
+release: executable
+
+$(OBJDIR):
+	mkdir -vp $(OBJDIR)
+
+$(TARGET): $(OBJCPP) $(OBJC)
+	$(CC) -o $@ $(OBJCPP) $(OBJC) $(LIB)
+
+clean:
+	rm -rf $(OBJDIR) $(TARGET)
+
+profile: executable
+	valgrind --leak-check=full --show-leak-kinds=all ./$(TARGET)
+
+deploy: release
+	strip $(TARGET)
+	./deploy.sh

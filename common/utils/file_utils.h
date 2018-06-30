@@ -1,5 +1,6 @@
-#ifndef FILE_H
-#define FILE_H
+
+#ifndef FILE_UTILS_H
+#define FILE_UTILS_H
 
 
 #ifdef __cplusplus
@@ -30,4 +31,4 @@ int does_file_exist (
 }
 #endif
 
-#endif // FILE_H
+#endif // ifndef FILE_UTILS_H

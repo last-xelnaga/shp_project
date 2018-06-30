@@ -21,4 +21,4 @@ int rpi_spi_mcp3008_read (
 }
 #endif
 
-#endif // RPI_SPI_H
+#endif // ifndef RPI_SPI_H

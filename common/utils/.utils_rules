@@ -1,0 +1,15 @@
+
+INC += \
+    -I $(COMMON)/utils
+
+SRCC += \
+    file_utils.c \
+    log.c \
+    sys_utils.c \
+    time_utils.c \
+
+SRCCPP += \
+    settings_class.cpp
+
+VPATH += \
+    src: $(COMMON)/utils

@@ -4,6 +4,7 @@
 
 #include <list>
 #include <string>
+#include <vector>
 
 
 class network_manager_class
@@ -21,9 +22,6 @@ private:
     static void* network_manager_worker (
             void* p_class);
 
-    void process_batch (
-            void);
-
 public:
     static network_manager_class& get_instance (
             void)
@@ -32,8 +30,15 @@ public:
         return instance;
     }
 
+public:
     void enqueue_message (
-            std::string message);
+            std::string client,
+            std::string type,
+            const int status,
+            std::vector <std::string> data);
+
+    void flush (
+            void);
 
     ~network_manager_class (
             void);
@@ -42,4 +47,4 @@ public:
     void operator=(network_manager_class const&) = delete;
 };
 
-#endif // NETWORK_MANAGER_CLASS_HPP
+#endif // ifndef NETWORK_MANAGER_CLASS_HPP

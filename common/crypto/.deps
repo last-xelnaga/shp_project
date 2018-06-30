@@ -1,3 +1,3 @@
 
-$(OBJDIR)/base64.o: base64.h .rules
-$(OBJDIR)/sha256.o: sha256.h .rules
+$(OBJDIR)/base64.o: base64.h .crypto_rules
+$(OBJDIR)/sha256.o: sha256.h .crypto_rules

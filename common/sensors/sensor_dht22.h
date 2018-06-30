@@ -16,4 +16,4 @@ int dht22_get_data (
 }
 #endif
 
-#endif // SENSOR_DHT22_H
+#endif // ifndef SENSOR_DHT22_H

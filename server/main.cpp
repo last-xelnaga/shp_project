@@ -23,7 +23,7 @@ void exit_function (
 int main (
         void)
 {
-    DEBUG_LOG_INFO ("starting...");
+    LOG_INFO ("starting...");
 
     signal (SIGINT, exit_function);
 
@@ -35,7 +35,7 @@ int main (
         sleep (1);
     }
 
-    DEBUG_LOG_INFO ("quiting...");
+    LOG_INFO ("quiting...");
     server_socket.terminate ();
 
     return 0;

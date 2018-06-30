@@ -1,4 +1,5 @@
 
-$(OBJDIR)/client_socket_class.o: client_socket_class.hpp log.h socket_common.h .rules
-$(OBJDIR)/server_socket_class.o: log.h server_socket_class.hpp socket_common.h .rules
-$(OBJDIR)/socket_common.o: log.h socket_common.h .rules
+$(OBJDIR)/client_socket_class.o: client_socket_class.hpp log.h socket_common.h .client_rules .utils_rules
+$(OBJDIR)/network_manager_class.o: client_socket_class.hpp log.h network_manager_class.hpp settings_class.hpp time_utils.h .client_rules .utils_rules
+$(OBJDIR)/server_socket_class.o: log.h server_socket_class.hpp socket_common.h .server_rules .utils_rules
+$(OBJDIR)/socket_common.o: log.h socket_common.h .client_rules .server_rules .utils_rules

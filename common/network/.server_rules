@@ -1,0 +1,15 @@
+
+INC += \
+    -I $(COMMON)/network
+
+SRCCPP += \
+    server_socket_class.cpp \
+
+SRCC += \
+    socket_common.c
+
+LIB += \
+    -lpthread
+
+VPATH += \
+    src: $(COMMON)/network

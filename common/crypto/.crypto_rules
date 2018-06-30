@@ -1,10 +1,10 @@
 
 INC += \
-    -I../common/crypto
+    -I $(COMMON)/crypto
 
 SRCC += \
     base64.c \
     sha256.c \
 
 VPATH += \
-    src:../common/crypto
+    src: $(COMMON)/crypto

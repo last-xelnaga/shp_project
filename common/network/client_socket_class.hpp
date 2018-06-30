@@ -1,6 +1,6 @@
 
-#ifndef SOCKET_CLIENT_HPP
-#define SOCKET_CLIENT_HPP
+#ifndef SOCKET_CLIENT_CLASS_HPP
+#define SOCKET_CLIENT_CLASS_HPP
 
 #include <string>
 
@@ -40,4 +40,4 @@ public:
             void);
 };
 
-#endif // SOCKET_CLIENT_HPP
+#endif // ifndef SOCKET_CLIENT_CLASS_HPP

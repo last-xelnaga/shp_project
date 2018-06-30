@@ -1,6 +1,6 @@
 
-#ifndef SOCKET_HPP
-#define SOCKET_HPP
+#ifndef SOCKET_COMMON_H
+#define SOCKET_COMMON_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,4 +26,4 @@ int recv_data (
 }
 #endif
 
-#endif // SOCKET_HPP
+#endif // ifndef SOCKET_COMMON_H

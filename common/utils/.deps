@@ -1,4 +1,6 @@
 
-$(OBJDIR)/file_utils.o: file_utils.h log.h .rules
-$(OBJDIR)/sys_utils.o: sys_utils.h .rules
-$(OBJDIR)/time_util.o: time_util.h .rules
+$(OBJDIR)/file_utils.o: file_utils.h log.h .utils_rules
+$(OBJDIR)/settings_class.o: file_utils.h log.h settings_class.hpp .utils_rules
+$(OBJDIR)/sys_utils.o: sys_utils.h .utils_rules
+$(OBJDIR)/time_util.o: time_util.h .utils_rules
+$(OBJDIR)/log.o: log.h .utils_rules

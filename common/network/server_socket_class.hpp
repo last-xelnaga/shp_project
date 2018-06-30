@@ -1,6 +1,6 @@
 
-#ifndef SOCKET_SERVER_HPP
-#define SOCKET_SERVER_HPP
+#ifndef SOCKET_SERVER_CLASS_HPP
+#define SOCKET_SERVER_CLASS_HPP
 
 #include <atomic>
 #include <list>
@@ -126,4 +126,4 @@ public:
             void);
 };
 
-#endif // SOCKET_SERVER_HPP
+#endif // ifndef SOCKET_SERVER_CLASS_HPP

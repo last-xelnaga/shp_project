@@ -37,7 +37,7 @@ int fcm_messaging_class::parse_service_account_json (
             obj = json::parse (file);
         else
         {
-            DEBUG_LOG_ERROR ("failed to open service-account.json");
+            LOG_ERROR ("failed to open service-account.json");
             result = -1;
         }
     }
@@ -120,7 +120,7 @@ int fcm_messaging_class::prepare_jwt (
         bio = BIO_new_mem_buf ((char*)m_pem_private_key.c_str (), -1);
         if (bio == NULL)
         {
-            DEBUG_LOG_ERROR ("BIO_new_mem_buf failed\n");
+            LOG_ERROR ("BIO_new_mem_buf failed\n");
             result = -1;
         }
     }
@@ -132,7 +132,7 @@ int fcm_messaging_class::prepare_jwt (
         rsakey = PEM_read_bio_RSAPrivateKey (bio, NULL, 0, NULL);
         if (!RSA_check_key (rsakey))
         {
-            DEBUG_LOG_ERROR ("failed to validate RSA key");
+            LOG_ERROR ("failed to validate RSA key");
             result = -1;
         }
     }
@@ -158,7 +158,7 @@ int fcm_messaging_class::prepare_jwt (
         }
         else
         {
-            DEBUG_LOG_ERROR ("failed to sigh jwt data");
+            LOG_ERROR ("failed to sigh jwt data");
             result = -1;
         }
 
@@ -190,7 +190,7 @@ int fcm_messaging_class::request_new_access_token (
     curl = curl_easy_init ();
     if (curl == NULL)
     {
-        DEBUG_LOG_ERROR ("curl_easy_init failed");
+        LOG_ERROR ("curl_easy_init failed");
         result = -1;
     }
 
@@ -201,7 +201,7 @@ int fcm_messaging_class::request_new_access_token (
         CURLcode res = curl_easy_setopt (curl, CURLOPT_URL, google_url);
         if (res != CURLE_OK)
         {
-            DEBUG_LOG_ERROR ("failed to set URL: %s", curl_easy_strerror (res));
+            LOG_ERROR ("failed to set URL: %s", curl_easy_strerror (res));
             result = -1;
         }
     }
@@ -214,7 +214,7 @@ int fcm_messaging_class::request_new_access_token (
         CURLcode res = curl_easy_setopt (curl, CURLOPT_HTTPHEADER, chunk);
         if (res != CURLE_OK)
         {
-            DEBUG_LOG_ERROR ("failed to set HEADER: %s", curl_easy_strerror (res));
+            LOG_ERROR ("failed to set HEADER: %s", curl_easy_strerror (res));
             result = -1;
         }
     }
@@ -224,7 +224,7 @@ int fcm_messaging_class::request_new_access_token (
     {
         if (parse_service_account_json () != 0)
         {
-            DEBUG_LOG_ERROR ("parse_service_account_json failed");
+            LOG_ERROR ("parse_service_account_json failed");
             result = -1;
         }
     }
@@ -234,7 +234,7 @@ int fcm_messaging_class::request_new_access_token (
     {
         if (prepare_jwt () != 0)
         {
-            DEBUG_LOG_ERROR ("prepare_jwt failed");
+            LOG_ERROR ("prepare_jwt failed");
             result = -1;
         }
     }
@@ -245,7 +245,7 @@ int fcm_messaging_class::request_new_access_token (
         CURLcode res = curl_easy_setopt (curl, CURLOPT_POSTFIELDS, m_jwt.c_str ());
         if (res != CURLE_OK)
         {
-            DEBUG_LOG_ERROR ("failed to set BODY: %s", curl_easy_strerror (res));
+            LOG_ERROR ("failed to set BODY: %s", curl_easy_strerror (res));
             result = -1;
         }
     }
@@ -259,7 +259,7 @@ int fcm_messaging_class::request_new_access_token (
         CURLcode res = curl_easy_setopt (curl, CURLOPT_WRITEFUNCTION, request_new_access_token_callback);
         if (res != CURLE_OK)
         {
-            DEBUG_LOG_ERROR ("failed to set callback: %s", curl_easy_strerror (res));
+            LOG_ERROR ("failed to set callback: %s", curl_easy_strerror (res));
             result = -1;
         }
     }
@@ -270,7 +270,7 @@ int fcm_messaging_class::request_new_access_token (
         CURLcode res = curl_easy_perform (curl);
         if (res != CURLE_OK)
         {
-            DEBUG_LOG_ERROR ("curl_easy_perform() failed: %s", curl_easy_strerror (res));
+            LOG_ERROR ("curl_easy_perform() failed: %s", curl_easy_strerror (res));
             result = -1;
         }
     }
@@ -296,13 +296,13 @@ void fcm_messaging_class::update_new_access_token (
         const char* reply,
         const unsigned int length)
 {
-    //DEBUG_LOG_INFO ("%s", reply);
+    //LOG_INFO ("%s", reply);
 
     m_token_reply += std::string (reply, length);
     std::size_t pos = m_token_reply.find ("\"expires_in\"");
     if (pos != std::string::npos)
     {
-        DEBUG_LOG_INFO ("request send was successful");
+        LOG_INFO ("request send was successful");
 
         std::string str ("\"access_token\": \"");
         pos = m_token_reply.find (str);
@@ -310,7 +310,7 @@ void fcm_messaging_class::update_new_access_token (
         pos = m_token_reply.find ("\"", pos);
         m_token_reply.erase (pos, m_token_reply.size () - pos);
 
-        //DEBUG_LOG_INFO ("%s\n", m_token_reply.c_str ());
+        //LOG_INFO ("%s\n", m_token_reply.c_str ());
         drop_file ("access_token");
 
         save_to_file ("access_token", m_token_reply.c_str (), m_token_reply.size ());
@@ -320,7 +320,7 @@ void fcm_messaging_class::update_new_access_token (
     pos = m_token_reply.find ("\"error\"");
     if (pos != std::string::npos)
     {
-        DEBUG_LOG_ERROR ("request wasn't successful");
+        LOG_ERROR ("request wasn't successful");
         return;
     }
 }
@@ -342,18 +342,20 @@ int fcm_messaging_class::get_access_token_from_cache (
     {
         char* buffer = NULL;
         unsigned int size = 0;
-        read_from_file ("access_token", (void**)&buffer, &size);
-        m_access_token = std::string (buffer, size);
-        free (buffer);
+        if (read_from_file ("access_token", (void**)&buffer, &size) == 0)
+        {
+            m_access_token = std::string (buffer, size);
+            free (buffer);
+        }
 
         if (m_access_token == "")
         {
-            DEBUG_LOG_ERROR ("read access_token file failed %s", strerror (errno));
+            LOG_ERROR ("read access_token file failed");
             result = -1;
         }
         else
         {
-            DEBUG_LOG_INFO ("file access_token is valid");
+            LOG_INFO ("file access_token is valid");
         }
     }
 
@@ -374,7 +376,7 @@ int fcm_messaging_class::send_message (
         curl = curl_easy_init ();
         if (curl == NULL)
         {
-            DEBUG_LOG_ERROR ("curl_easy_init failed");
+            LOG_ERROR ("curl_easy_init failed");
             result = -1;
         }
     }
@@ -389,7 +391,7 @@ int fcm_messaging_class::send_message (
         CURLcode res = curl_easy_setopt (curl, CURLOPT_URL, fcm_url);
         if (res != CURLE_OK)
         {
-            DEBUG_LOG_ERROR ("failed to set URL: %s", curl_easy_strerror (res));
+            LOG_ERROR ("failed to set URL: %s", curl_easy_strerror (res));
             result = -1;
         }
     }
@@ -403,7 +405,7 @@ int fcm_messaging_class::send_message (
         CURLcode res = curl_easy_setopt (curl, CURLOPT_HTTPHEADER, chunk);
         if (res != CURLE_OK)
         {
-            DEBUG_LOG_ERROR ("failed to set HEADER: %s", curl_easy_strerror (res));
+            LOG_ERROR ("failed to set HEADER: %s", curl_easy_strerror (res));
             result = -1;
         }
     }
@@ -424,7 +426,7 @@ int fcm_messaging_class::send_message (
         CURLcode res = curl_easy_setopt (curl, CURLOPT_COPYPOSTFIELDS, message.c_str ());
         if (res != CURLE_OK)
         {
-            DEBUG_LOG_ERROR ("failed to set BODY: %s\n", curl_easy_strerror (res));
+            LOG_ERROR ("failed to set BODY: %s\n", curl_easy_strerror (res));
             result = -1;
         }
     }
@@ -438,7 +440,7 @@ int fcm_messaging_class::send_message (
         CURLcode res = curl_easy_setopt (curl, CURLOPT_WRITEFUNCTION, send_message_callback);
         if (res != CURLE_OK)
         {
-            DEBUG_LOG_ERROR ("failed to set callback: %s", curl_easy_strerror (res));
+            LOG_ERROR ("failed to set callback: %s", curl_easy_strerror (res));
             result = -1;
         }
     }
@@ -449,7 +451,7 @@ int fcm_messaging_class::send_message (
         CURLcode res = curl_easy_perform (curl);
         if (res != CURLE_OK)
         {
-            DEBUG_LOG_ERROR ("curl_easy_perform failed: %s", curl_easy_strerror (res));
+            LOG_ERROR ("curl_easy_perform failed: %s", curl_easy_strerror (res));
             result = -1;
         }
     }
@@ -475,20 +477,20 @@ void fcm_messaging_class::update_send_status (
         const char* reply,
         const unsigned int length)
 {
-    //DEBUG_LOG_INFO ("%s\n", reply);
+    //LOG_INFO ("%s\n", reply);
 
     m_fcm_reply += std::string (reply, length);
     std::size_t pos = m_fcm_reply.find ("\"name\"");
     if (pos != std::string::npos)
     {
-        DEBUG_LOG_INFO ("send was successful");
+        LOG_INFO ("send was successful");
         return;
     }
 
     pos = m_fcm_reply.find ("\"error\"");
     if (pos != std::string::npos)
     {
-        DEBUG_LOG_ERROR ("send wasn't successful");
+        LOG_ERROR ("send wasn't successful");
         return;
     }
 }

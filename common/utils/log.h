@@ -5,29 +5,36 @@
 
 
 // DEBUG_TAG defined in Makefile
-#define QUOTE(name)                 #name
-#define STR(macro)                  QUOTE(macro)
-#define DEBUG_TAG_NAME              STR(DEBUG_TAG)
+#define QUOTE(name)                     #name
+#define STR(macro)                      QUOTE(macro)
+#define DEBUG_TAG_NAME                  STR(DEBUG_TAG)
 
 // short form of the file name
-#define FLE     strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__
+#define FLE                                         \
+    strrchr (__FILE__, '/') ? strrchr (__FILE__, '/') + 1 : __FILE__
 
 // debug levels
-#define LOG_ERROR                   1  // LOG_ERROR
-#define LOG_INFO                    2  // LOG_INFO
+#define LOG_ERROR_ID                    1  // LOG_ERROR
+#define LOG_INFO_ID                     2  // LOG_INFO
+#define LOG_DEBUG_ID                    3  // LOG_DEBUG
 
 // prototypes for the Infos
-#define DEBUG_LOG_INFO(...)                         \
-    debug_log_print (DEBUG_TAG_NAME, LOG_INFO, FLE, \
-            __LINE__, __VA_ARGS__);
+#define LOG_INFO(...)                               \
+    debug_log_print (DEBUG_TAG_NAME, LOG_INFO_ID,   \
+            FLE, __LINE__, __VA_ARGS__);
 
 // prototypes for the Errors
-#define DEBUG_LOG_ERROR(...)                        \
-    debug_log_print (DEBUG_TAG_NAME, LOG_ERROR, FLE,\
-            __LINE__, __VA_ARGS__);
+#define LOG_ERROR(...)                              \
+    debug_log_print (DEBUG_TAG_NAME, LOG_ERROR_ID,  \
+            FLE, __LINE__, __VA_ARGS__);
+
+// prototypes for the Errors
+#define LOG_DEBUG(...)                              \
+    debug_log_print (DEBUG_TAG_NAME, LOG_DEBUG_ID,  \
+            FLE, __LINE__, __VA_ARGS__);
 
 // prototype for print array function
-#define SECD_DEBUG_LOG_PRINT_ARRAY(__header, __data, __length)\
+#define SECD_DEBUG_LOG_PRINT_ARRAY(__header, __data, __length) \
     debug_log_print_array (DEBUG_TAG_NAME, __header, __data, __length)
 
 #ifdef __cplusplus

@@ -13,14 +13,17 @@ void debug_log_print (
         const int prio,
         const char* p_file_name,
         const unsigned int line,
-        const char* p_text, ...)
+        const char* p_text,
+        ...)
 {
     char buffer [MAX_LOG_MSG_SIZE + 1] = { 0 };
 
     // set the priority
     char prio_letter [] = "E";
-    if (prio == LOG_INFO)
+    if (prio == LOG_INFO_ID)
         prio_letter [0] = 'I';
+    else if (prio == LOG_DEBUG_ID)
+        prio_letter [0] = 'D';
 
     time_t now = time (NULL);
     struct tm* tm = localtime (&now);
@@ -59,7 +62,7 @@ void debug_log_print_array (
     unsigned int p_log_ascii_len = 0;
 
     // write the header
-    debug_log_print (p_tag, LOG_INFO, NULL, 0,
+    debug_log_print (p_tag, LOG_DEBUG_ID, NULL, 0,
             "array: %s, length: %d", p_header, length);
 
     // process all bytes
@@ -76,7 +79,7 @@ void debug_log_print_array (
             p_log_ascii_len = 0;
 
             // write the line
-            debug_log_print (p_tag, LOG_INFO, NULL, 0,
+            debug_log_print (p_tag, LOG_DEBUG_ID, NULL, 0,
                     "%s || %s", p_log_hex, p_log_ascii);
         }
 
@@ -100,7 +103,7 @@ void debug_log_print_array (
         p_log_hex [p_log_hex_len] = 0;
         p_log_ascii [p_log_ascii_len] = 0;
 
-        debug_log_print (p_tag, LOG_INFO, NULL, 0,
+        debug_log_print (p_tag, LOG_DEBUG_ID, NULL, 0,
                 "%s || %s ", p_log_hex, p_log_ascii);
     }
 }

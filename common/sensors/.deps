@@ -1,5 +1,5 @@
 
-$(OBJDIR)/rpi_gpio.o: rpi_gpio.h log.h .rules
-$(OBJDIR)/rpi_spi.o: rpi_spi.h log.h .rules
-$(OBJDIR)/sensor_buzzer.o: sensor_buzzer.h log.h rpi_gpio.h .rules
-$(OBJDIR)/sensor_dht22.o: sensor_dht22.h log.h rpi_gpio.h .rules
+$(OBJDIR)/rpi_gpio.o: rpi_gpio.h log.h .sensors_rules .utils_rules
+$(OBJDIR)/rpi_spi.o: rpi_spi.h log.h .sensors_rules .utils_rules
+$(OBJDIR)/sensor_buzzer.o: sensor_buzzer.h log.h rpi_gpio.h .sensors_rules .utils_rules
+$(OBJDIR)/sensor_dht22.o: sensor_dht22.h log.h rpi_gpio.h .sensors_rules .utils_rules

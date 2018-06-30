@@ -47,7 +47,7 @@ int process_message (
         const char* buffer)
 {
     int result = 0;
-    DEBUG_LOG_INFO ("\n%s", buffer);
+    LOG_INFO ("\n%s", buffer);
 
     auto json = json::parse (buffer);
     json::value client = json ["client"];
@@ -57,11 +57,11 @@ int process_message (
     json::value status_str = json ["data"]["status"];
     int status = to_number (status_str);
 
-    DEBUG_LOG_INFO ("new %s message", type_str.c_str ());
+    LOG_INFO ("new %s message", type_str.c_str ());
 
-    if (type_str == "\"dht\"")
+    if (type_str == "\"data\"")
     {
-        //DEBUG_LOG_INFO ("temp");
+        //LOG_INFO ("temp");
         if (status)
         {
             json::value temp = json ["data"]["temp"];
@@ -81,9 +81,9 @@ int process_message (
             pws_client_data.temp__errors_overall ++;
         }
     }
-    else if (type_str == "\"watering_stop\"")
+    else if (type_str == "\"watering\"")
     {
-        //DEBUG_LOG_INFO ("pump");
+        //LOG_INFO ("pump");
         //std::string status_str = stringify (status, json::ESCAPE_UNICODE);
         std::string fcm_message_body;
         if (status)
@@ -104,9 +104,9 @@ int process_message (
 
         fcm_messaging_class::get_instance ().register_message ("SHP", fcm_message_body.c_str ());
     }
-    else if (type_str == "\"app_start\"")
+    else if (type_str == "\"greeting\"")
     {
-        //DEBUG_LOG_INFO ("start");
+        //LOG_INFO ("start");
         if (status)
         {
 
@@ -117,7 +117,7 @@ int process_message (
     }
     else
     {
-        //DEBUG_LOG_ERROR ("unknown message");
+        LOG_ERROR ("unknown message");
         result = -1;
     }
 

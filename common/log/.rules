@@ -1,9 +1,0 @@
-
-INC += \
-    -I../common/log
-
-SRCC += \
-    log.c
-
-VPATH += \
-    src:../common/log

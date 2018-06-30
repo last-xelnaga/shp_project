@@ -19,4 +19,4 @@ void set_app_priority (
 }
 #endif
 
-#endif // SYS_UTILS_H
+#endif // ifndef SYS_UTILS_H

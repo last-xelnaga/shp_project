@@ -18,7 +18,7 @@ int set_blocking (
 
     if (fd < 0)
     {
-        DEBUG_LOG_ERROR ("invalid socket param");
+        LOG_ERROR ("invalid socket param");
         result = -1;
     }
 
@@ -28,7 +28,7 @@ int set_blocking (
         flags = fcntl (fd, F_GETFL, 0);
         if (flags == -1)
         {
-            DEBUG_LOG_ERROR ("fcntl call failed: %s", strerror (errno));
+            LOG_ERROR ("fcntl call failed: %s", strerror (errno));
             result = -1;
         }
     }
@@ -49,7 +49,7 @@ int set_blocking (
         flags = fcntl (fd, F_SETFL, new_flags);
         if (flags == -1)
         {
-            DEBUG_LOG_ERROR ("fcntl call failed: %s", strerror (errno));
+            LOG_ERROR ("fcntl call failed: %s", strerror (errno));
             result = -1;
         }
     }
@@ -86,12 +86,12 @@ int send_data (
             int sent = send (fd, p_buffer, total_to_send_back, MSG_NOSIGNAL);
             if (sent < 0)
             {
-                DEBUG_LOG_ERROR ("send failed: %s", strerror (errno));
+                LOG_ERROR ("send failed: %s", strerror (errno));
                 result = -1;
             }
             else if (sent == 0)
             {
-                DEBUG_LOG_ERROR ("send failed. channel is closed");
+                LOG_ERROR ("send failed. channel is closed");
                 result = -1;
             }
             else
@@ -103,13 +103,13 @@ int send_data (
         else if (res == 0)
         {
             // time out
-            DEBUG_LOG_ERROR ("send failed. timeout");
+            LOG_ERROR ("send failed. timeout");
             result = -1;
         }
         else
         {
             // error
-            DEBUG_LOG_ERROR ("send failed. select error: %s", strerror (errno));
+            LOG_ERROR ("send failed. select error: %s", strerror (errno));
             result = -1;
         }
     } while ((result == 0) && (total_to_send_back > 0));
@@ -148,12 +148,12 @@ int recv_data (
             if (received < 0)
             {
                 // error
-                DEBUG_LOG_ERROR ("recv failed: %s", strerror (errno));
+                LOG_ERROR ("recv failed: %s", strerror (errno));
                 result = -1;
             }
             else if (received == 0)
             {
-                DEBUG_LOG_ERROR ("recv failed. channel is closed");
+                LOG_ERROR ("recv failed. channel is closed");
                 result = -1;
             }
             else
@@ -166,13 +166,13 @@ int recv_data (
         else if (res == 0)
         {
             // time out
-            DEBUG_LOG_ERROR ("recv failed. timeout");
+            LOG_ERROR ("recv failed. timeout");
             result = -1;
         }
         else
         {
             // error
-            DEBUG_LOG_ERROR ("recv failed. select error: %s", strerror (errno));
+            LOG_ERROR ("recv failed. select error: %s", strerror (errno));
             result = -1;
         }
     } while ((result == 0) && (total_received < to_receive));

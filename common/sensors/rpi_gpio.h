@@ -31,4 +31,4 @@ unsigned int get_bus_state (
 }
 #endif
 
-#endif // RPI_GPI_H
+#endif // ifndef RPI_GPI_H

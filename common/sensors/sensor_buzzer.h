@@ -19,4 +19,4 @@ void buzzer_play_sound (
 }
 #endif
 
-#endif // SENSOR_BUZZER_H
+#endif // ifndef SENSOR_BUZZER_H

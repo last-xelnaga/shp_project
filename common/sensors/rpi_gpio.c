@@ -37,7 +37,7 @@ int rpi_gpio_init (
 
     if (!is_valid_rpi ())
     {
-        DEBUG_LOG_ERROR ("this board in not suitable for that app");
+        LOG_ERROR ("this board in not suitable for that app");
         return -1;
     }
 
@@ -45,7 +45,7 @@ int rpi_gpio_init (
     FILE* fp = fopen ("/proc/device-tree/soc/ranges", "rb");
     if (fp == NULL)
     {
-        DEBUG_LOG_ERROR ("failed to open ranges %s", strerror (errno));
+        LOG_ERROR ("failed to open ranges %s", strerror (errno));
         return -1;
     }
 
@@ -54,7 +54,7 @@ int rpi_gpio_init (
     unsigned char p_range [4];
     if (fread (p_range, 1, sizeof (p_range), fp) != sizeof (p_range))
     {
-        DEBUG_LOG_ERROR ("failed to read ranges %s", strerror (errno));
+        LOG_ERROR ("failed to read ranges %s", strerror (errno));
         fclose (fp);
         return -1;
     }
@@ -63,7 +63,7 @@ int rpi_gpio_init (
     int fd = open ("/dev/gpiomem", O_RDWR | O_SYNC);
     if (fd == -1)
     {
-        DEBUG_LOG_ERROR ("failed to open gpiomem %s", strerror (errno));
+        LOG_ERROR ("failed to open gpiomem %s", strerror (errno));
         return -1;
     }
 
@@ -79,7 +79,7 @@ int rpi_gpio_init (
 
     if (p_gpio_base == MAP_FAILED)
     {
-        DEBUG_LOG_ERROR ("failed to map gpiomem %s", strerror (errno));
+        LOG_ERROR ("failed to map gpiomem %s", strerror (errno));
         p_gpio_base = NULL;
         return -1;
     }

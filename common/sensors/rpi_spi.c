@@ -27,21 +27,23 @@
 unsigned int* bcm2835_spi0;
 unsigned int* bcm2835_gpio;
 
-void bcm2835_init ()
+void bcm2835_init (
+        void)
 {
     int  memfd;
     /* Open the master /dev/mem device */
-    if ((memfd = open("/dev/mem", O_RDWR | O_SYNC) ) < 0)
+    if ((memfd = open ("/dev/mem", O_RDWR | O_SYNC) ) < 0)
     {
-        fprintf(stderr, "bcm2835_init: Unable to open /dev/mem: %s\n", strerror(errno)) ;
+        fprintf(stderr, "bcm2835_init: Unable to open /dev/mem: %s\n", strerror (errno)) ;
         return;
     }
 
-    unsigned int* bcm2835_peripherals_base = (unsigned int*)BCM2835_PERI_BASE;
-    unsigned int bcm2835_peripherals_size = BCM2835_PERI_SIZE;
+    //unsigned int* bcm2835_peripherals_base = (unsigned int*)BCM2835_PERI_BASE;
+    //unsigned int bcm2835_peripherals_size = BCM2835_PERI_SIZE;
 
     // Base of the peripherals block is mapped to VM
-    unsigned int* bcm2835_peripherals = (unsigned int*) mmap (NULL, bcm2835_peripherals_size, (PROT_READ | PROT_WRITE), MAP_SHARED, memfd, (unsigned int)bcm2835_peripherals_base);
+    unsigned int* bcm2835_peripherals = (unsigned int*) mmap (NULL, BCM2835_PERI_SIZE,
+            (PROT_READ | PROT_WRITE), MAP_SHARED, memfd, (unsigned long)BCM2835_PERI_BASE);
     bcm2835_spi0 = bcm2835_peripherals + BCM2835_SPI0_BASE / 4;
     bcm2835_gpio = bcm2835_peripherals + BCM2835_GPIO_BASE / 4;
 }

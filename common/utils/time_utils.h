@@ -9,10 +9,13 @@ extern "C" {
 
 //
 void sleep_milliseconds (
-        unsigned int millis);
+        const unsigned int millis);
+
+const char* get_time_str (
+        void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // TIME_UTILS_H
+#endif // ifndef TIME_UTILS_H

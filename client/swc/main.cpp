@@ -33,13 +33,13 @@ void exit_function (
 void liquid_level_setup (
         void)
 {
-    DEBUG_LOG_INFO ("liquid_level_setup");
+    LOG_INFO ("liquid_level_setup");
 }
 
 int get_liquid_level (
         int* limit)
 {
-    DEBUG_LOG_INFO ("get_liquid_level");
+    LOG_INFO ("get_liquid_level");
 
     *limit = 55;
 
@@ -58,12 +58,12 @@ int get_liquid_level (
 int main (
         void)
 {
-    DEBUG_LOG_INFO ("app start");
+    LOG_INFO ("app start");
     signal (SIGINT, exit_function);
 
     if (geteuid () != 0)
     {
-        DEBUG_LOG_ERROR ("need to be root to run");
+        LOG_ERROR ("need to be root to run");
         is_going_on = 0;
     }
 
@@ -73,7 +73,7 @@ int main (
     {
         if (rpi_gpio_init () == -1)
         {
-            DEBUG_LOG_ERROR ("rpi_gpio_init has failed");
+            LOG_ERROR ("rpi_gpio_init has failed");
             is_going_on = 0;
         }
     }
@@ -82,7 +82,7 @@ int main (
     {
         if (rpi_spi_init () == -1)
         {
-            DEBUG_LOG_ERROR ("rpi_gpio_init has failed");
+            LOG_ERROR ("rpi_gpio_init has failed");
             is_going_on = 0;
         }
     }
@@ -110,7 +110,7 @@ int main (
             unsigned int hum; int temp;
             int status = dht22_get_data (SENSOR_DHT22_GPIO, &hum, &temp);
             if (status == 0)
-                DEBUG_LOG_INFO ("sensor_dht11_get_data %2.1f %%   %2.1f C", (float)hum / 10, (float)temp / 10);
+                LOG_INFO ("sensor_dht11_get_data %2.1f %%   %2.1f C", (float)hum / 10, (float)temp / 10);
 
             sleep (1);
 
@@ -133,6 +133,6 @@ int main (
             count = 0;
     }
 
-    DEBUG_LOG_INFO ("app exit");
+    LOG_INFO ("app exit");
     return 0;
 }

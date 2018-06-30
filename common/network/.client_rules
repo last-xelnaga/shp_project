@@ -1,0 +1,22 @@
+
+INC += \
+    -I $(COMMON)/network
+
+SRCCPP += \
+    client_socket_class.cpp \
+    network_manager_class.cpp
+
+SRCC += \
+    socket_common.c
+
+LIB += \
+    -lpthread
+
+VPATH += \
+    src: $(COMMON)/network
+
+
+#$(OBJDIR)/client_socket_class.o: client_socket_class.hpp log.h socket_common.h .rules_client
+#$(OBJDIR)/network_manager_class.o: client_socket_class.hpp log.h network_manager_class.hpp settings_class.hpp time_utils.h .rules_client
+#$(OBJDIR)/server_socket_class.o: log.h server_socket_class.hpp socket_common.h .rules_server
+#$(OBJDIR)/socket_common.o: log.h socket_common.h .rules_client .rules_server

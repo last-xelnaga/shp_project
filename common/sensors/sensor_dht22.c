@@ -1,7 +1,6 @@
 
 #include "sensor_dht22.h"
 #include "rpi_gpio.h"
-//#include "sys_utils.h"
 #include "time_utils.h"
 #include "log.h"
 
@@ -134,7 +133,7 @@ static int is_data_crc_valid (
     if (crc != p_data [4])
         result = 0;
 
-    DEBUG_LOG_INFO ("0x%02x 0x%02x 0x%02x 0x%02x 0x%02x, crc %s",
+    LOG_INFO ("0x%02x 0x%02x 0x%02x 0x%02x 0x%02x, crc %s",
             p_data [0], p_data [1], p_data [2], p_data [3], p_data [4],
             result == 1 ? "OK" : "FAILED");
 
@@ -157,7 +156,7 @@ int dht22_get_data (
     //set_app_priority (PRIORITY_DEFAULT);
     if (!is_data_crc_valid ())
     {
-        DEBUG_LOG_ERROR ("dht22 data crc failed");
+        LOG_ERROR ("dht22 data crc failed");
         return -1;
     }
 

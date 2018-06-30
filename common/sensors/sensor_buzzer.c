@@ -9,7 +9,6 @@ void play_sound (
         const unsigned int gpio_num,
         const int long_in_ms)
 {
-#ifdef USE_WIRINGPI_LIB
     for (int i = 0; i < long_in_ms; ++ i)
     {
         sleep_milliseconds (1);
@@ -17,17 +16,14 @@ void play_sound (
         sleep_milliseconds (1);
         set_pin_voltage (gpio_num, LOW);
     }
-#endif // #ifdef USE_WIRINGPI_LIB
 }
 
 void buzzer_play_sound (
         const unsigned int gpio_num,
         const int sound_id)
 {
-#ifdef USE_WIRINGPI_LIB
     set_pin_direction (gpio_num, OUTPUT);
     set_pin_voltage (gpio_num, LOW);
-#endif // #ifdef USE_WIRINGPI_LIB
 
     switch (sound_id)
     {

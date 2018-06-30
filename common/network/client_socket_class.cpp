@@ -29,7 +29,7 @@ void parse_url (
     host_name = port_pos == std::string::npos ? proxy.substr (offset) : proxy.substr (offset, port_pos - offset);
     host_port = std::stoi (port_pos == std::string::npos ? offset == 7 ? "80" : "443" : proxy.substr (port_pos + 1));
 
-    DEBUG_LOG_INFO ("host %s:%d", host_name.c_str (), host_port);
+    LOG_INFO ("host %s:%d", host_name.c_str (), host_port);
 }
 
 int client_socket_class::connect_to_server (
@@ -46,7 +46,7 @@ int client_socket_class::connect_to_server (
         parse_url (proxy_name, server_name, mi_port_number);
     }
 
-    DEBUG_LOG_INFO ("server_name %s", server_name.c_str ());
+    LOG_INFO ("server_name %s", server_name.c_str ());
 
     if (result == 0)
     {
@@ -56,7 +56,7 @@ int client_socket_class::connect_to_server (
         struct hostent* p_host = gethostbyname (server_name.c_str ());
         if (p_host == NULL)
         {
-            DEBUG_LOG_ERROR ("gethostbyname call failed: %s", strerror (errno));
+            LOG_ERROR ("gethostbyname call failed: %s", strerror (errno));
             result = -1;
         }
         else
@@ -70,7 +70,7 @@ int client_socket_class::connect_to_server (
         int res = connect (socket_fd, (struct sockaddr*)&socket_address, sizeof (sockaddr_in));
         if (res < 0)
         {
-            DEBUG_LOG_ERROR ("connect call failed: %s", strerror (errno));
+            LOG_ERROR ("connect call failed: %s", strerror (errno));
             result = -1;
         }
     }
@@ -87,13 +87,13 @@ int client_socket_class::connect_to_server (
             p_answer [12] = 0;
             if (strcmp (p_answer, "HTTP/1.1 200") != 0)
             {
-                DEBUG_LOG_ERROR ("proxy said %s", p_answer);
+                LOG_ERROR ("proxy said %s", p_answer);
                 result = -1;
             }
         }
         else
         {
-            DEBUG_LOG_ERROR ("connect to proxy failed");
+            LOG_ERROR ("connect to proxy failed");
             result = -1;
         }
     }
@@ -115,7 +115,7 @@ int client_socket_class::open_connection (
 
     if (socket_fd > 0)
     {
-        DEBUG_LOG_ERROR ("wrong socket state");
+        LOG_ERROR ("wrong socket state");
         result = -1;
     }
 
@@ -131,7 +131,7 @@ int client_socket_class::open_connection (
         socket_fd = socket (AF_INET, SOCK_STREAM, IPPROTO_IP);
         if (socket_fd < 0)
         {
-            DEBUG_LOG_ERROR ("socket call failed: %s", strerror (errno));
+            LOG_ERROR ("socket call failed: %s", strerror (errno));
             result = -1;
         }
     }
@@ -143,7 +143,7 @@ int client_socket_class::open_connection (
         int res = setsockopt (socket_fd, IPPROTO_TCP, TCP_SYNCNT, &syn_packets, sizeof (syn_packets));
         if (res < 0)
         {
-            DEBUG_LOG_ERROR ("setsockopt call failed: %s", strerror (errno));
+            LOG_ERROR ("setsockopt call failed: %s", strerror (errno));
             result = -1;
         }
     }
@@ -154,8 +154,17 @@ int client_socket_class::open_connection (
         char* p_http_proxy = getenv ("http_proxy");
         if (p_http_proxy != NULL)
         {
-            DEBUG_LOG_INFO ("proxy: \"%s\"", p_http_proxy);
+            LOG_INFO ("proxy: \"%s\"", p_http_proxy);
             proxy_name = std::string (p_http_proxy);
+        }
+    }
+
+    if (result == 0)
+    {
+        if (server_name == "localhost" && proxy_name.size ())
+        {
+            LOG_INFO ("skip proxy for localhost");
+            proxy_name = "";
         }
     }
 

@@ -45,7 +45,7 @@ int server_socket_class::server_client_class::recv_message (
     if (result == 0 && *size > 1024)
     {
         unsigned int bad_size = *size;
-        DEBUG_LOG_ERROR ("message is malformed, size is: %d [%d %d %d %d]",
+        LOG_ERROR ("message is malformed, size is: %d [%d %d %d %d]",
                 bad_size, (unsigned char)(bad_size & 0xff000000) >> 24, (unsigned char)(bad_size & 0xff0000) >> 16,
                 (unsigned char)(bad_size & 0xff00) >> 8, (unsigned char)(bad_size & 0xff));
         result = -1;
@@ -124,7 +124,7 @@ void server_socket_class::working_thread (
         p_server->remove_finished (is_time_to_close);
     } while (!is_time_to_close);
 
-    DEBUG_LOG_INFO ("end the accept loop");
+    LOG_INFO ("end the accept loop");
 }
 
 int server_socket_class::bind_on_server (
@@ -135,7 +135,7 @@ int server_socket_class::bind_on_server (
 
     if (socket_fd < 0)
     {
-        DEBUG_LOG_ERROR ("invalid socket param");
+        LOG_ERROR ("invalid socket param");
         result = -1;
     }
 
@@ -145,7 +145,7 @@ int server_socket_class::bind_on_server (
         int res = setsockopt (socket_fd, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof (flag));
         if (res < 0)
         {
-            DEBUG_LOG_ERROR ("setsockopt call failed: %s", strerror (errno));
+            LOG_ERROR ("setsockopt call failed: %s", strerror (errno));
             result = -1;
         }
     }
@@ -162,7 +162,7 @@ int server_socket_class::bind_on_server (
         int res = bind (socket_fd, (struct sockaddr *) &socket_address, sizeof (struct sockaddr_in));
         if (res < 0)
         {
-            DEBUG_LOG_ERROR ("bind call failed: %s", strerror (errno));
+            LOG_ERROR ("bind call failed: %s", strerror (errno));
             result = -1;
         }
     }
@@ -172,7 +172,7 @@ int server_socket_class::bind_on_server (
         int res = listen (socket_fd, SOCKET_QUEUE);
         if (res < 0)
         {
-            DEBUG_LOG_ERROR ("listen call failed: %s", strerror (errno));
+            LOG_ERROR ("listen call failed: %s", strerror (errno));
             result = -1;
         }
     }
@@ -196,7 +196,7 @@ int server_socket_class::start (
 
     if (state != ready_to_bind)
     {
-        DEBUG_LOG_ERROR ("invalid socket state");
+        LOG_ERROR ("invalid socket state");
         result = -1;
     }
 
@@ -225,7 +225,7 @@ int server_socket_class::bind_and_listen (
         socket_fd = socket (AF_INET, SOCK_STREAM, IPPROTO_IP);
         if (socket_fd < 0)
         {
-            DEBUG_LOG_ERROR ("socket call failed: %s", strerror (errno));
+            LOG_ERROR ("socket call failed: %s", strerror (errno));
             result = -1;
         }
     }
@@ -251,7 +251,7 @@ int server_socket_class::bind_and_listen (
 int server_socket_class::accept_client (
         void)
 {
-    DEBUG_LOG_INFO ("accept_client start");
+    LOG_INFO ("accept_client start");
 
     int result = 0;
     int accept_fd = -1;
@@ -267,7 +267,7 @@ int server_socket_class::accept_client (
         accept_fd = accept (socket_fd, NULL, NULL);
         if (accept_fd < 0)
         {
-            DEBUG_LOG_ERROR ("accept call failed: %s", strerror (errno));
+            LOG_ERROR ("accept call failed: %s", strerror (errno));
             result = -1;
         }
     }
@@ -280,7 +280,7 @@ int server_socket_class::accept_client (
 
     if (result == 0)
     {
-        DEBUG_LOG_INFO ("register new client");
+        LOG_INFO ("register new client");
 
         server_client_class* p_client_class = new server_client_class (mp_func, accept_fd);
 
@@ -293,7 +293,7 @@ int server_socket_class::accept_client (
         m_clients_spinlock.unlock ();
     }
 
-    DEBUG_LOG_INFO ("accepr client finish");
+    LOG_INFO ("accepr client finish");
 
     return result;
 }
@@ -314,7 +314,7 @@ void server_socket_class::remove_finished (
             {
                 delete (*it);
                 m_clients.erase (it ++);
-                DEBUG_LOG_INFO ("client erased");
+                LOG_INFO ("client erased");
             }
             else
                 ++ it;
@@ -330,10 +330,10 @@ void server_socket_class::terminate (
 {
     state = ready_to_close;
 
-    DEBUG_LOG_INFO ("waiting for join");
+    LOG_INFO ("waiting for join");
     shutdown (socket_fd, 0);
     m_worker_thread.join ();
-    DEBUG_LOG_INFO ("joined");
+    LOG_INFO ("joined");
 
     if (socket_fd >= 0)
     {
