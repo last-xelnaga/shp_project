@@ -36,19 +36,13 @@ static void read_data (
     // that it could stay in low-power-consumption mode
     set_pin_voltage (gpio_num, HIGH);
 
-sleep_milliseconds (20);
+    sleep_milliseconds (20);
 
     // send 'start' command
     // pull the bus down
     set_pin_voltage (gpio_num, LOW);
     // and wait at least 18ms
     sleep_milliseconds (20);
-
-    // now pull the bus up
-    //set_pin_voltage (SENSOR_DHT11_GPIO, HIGH);
-
-    // and wait for response (20 - 40 us)
-    //sleep_milliseconds (20);
 
     // at this point the sensor should start to react
     // on our 'start' command
@@ -95,7 +89,11 @@ sleep_milliseconds (20);
         }
     } while (0);
 
-    //set_app_priority (PRIORITY_DEFAULT);
+    set_pin_direction (gpio_num, OUTPUT);
+
+    // pull the bus high. this one will show to sensor
+    // that it could stay in low-power-consumption mode
+    set_pin_voltage (gpio_num, HIGH);
 
     // Compute the average low pulse width to use as a 50 microsecond reference threshold.
     // Ignore the first two readings because they are a constant 80 microsecond pulse.
@@ -109,7 +107,6 @@ sleep_milliseconds (20);
     // Interpret each high pulse as a 0 or 1 by comparing it to the 50us reference.
     // If the count is less than 50us it must be a ~28us 0 pulse, and if it's higher
     // then it must be a ~70us 1 pulse.
-    //unsigned char data[5] = {0};
     for (int i = 3; i < DHT_PULSES * 2; i += 2)
     {
       int index = (i - 3) / 16;
@@ -140,8 +137,6 @@ static int is_data_crc_valid (
     return result;
 }
 
-
-
 int dht22_get_data (
         const unsigned int gpio_num,
         unsigned int* humidity,
@@ -151,9 +146,7 @@ int dht22_get_data (
         p_data [i] = 0;
     p_data [4] = 1;
 
-    //set_app_priority (PRIORITY_MAX);
     read_data (gpio_num);
-    //set_app_priority (PRIORITY_DEFAULT);
     if (!is_data_crc_valid ())
     {
         LOG_ERROR ("dht22 data crc failed");

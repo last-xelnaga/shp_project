@@ -34,9 +34,9 @@ const char* get_time_str (
         "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
     };
 
-    static char result [21];
+    static char result [32];
 
-    sprintf (result, "%d %s %.2d %.2d:%.2d:%.2d",
+    sprintf (result, "%4d %s %.2d %.2d:%.2d:%.2d",
         1900 + tm->tm_year,
         mon_name [tm->tm_mon],
         tm->tm_mday,

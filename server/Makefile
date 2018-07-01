@@ -1,9 +1,7 @@
 
 TARGET = shp_server
-FLAGS  = -O0 -g3 -ggdb
-#CFLAGS	+= -O2 -fno-omit-frame-pointer
-
 OBJDIR = $(shell pwd)/obj
+FLAGS  = 
 INC    = -I.
 LIB    =
 

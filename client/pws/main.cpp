@@ -1,13 +1,12 @@
 
+#include "log.h"
 #include "network_manager_class.hpp"
-#include "settings_class.hpp"
-
 #include "rpi_gpio.h"
 #include "rpi_spi.h"
 #include "sensor_buzzer.h"
 #include "sensor_dht22.h"
-
-#include "log.h"
+#include "settings_class.hpp"
+#include "sys_utils.h"
 
 #include <signal.h>
 #include <unistd.h>
@@ -63,8 +62,8 @@ bool is_time_for_watering (
     struct tm tm = *localtime (&now);
     unsigned int curr_time_in_sec = tm.tm_hour * 3600 + tm.tm_min * 60 + tm.tm_sec;
     unsigned int pump_time = std::stoi (settings_class::get_value_for ("pump_start_time"));
-    unsigned int pump_start_time_in_sec = pump_time / 100 * 3600 + pump_time % 100 * 60;   
-    unsigned int pump_stop_time_in_sec = pump_start_time_in_sec + 
+    unsigned int pump_start_time_in_sec = pump_time / 100 * 3600 + pump_time % 100 * 60;
+    unsigned int pump_stop_time_in_sec = pump_start_time_in_sec +
             std::stoi (settings_class::get_value_for ("pump_active_time")) - 1;
 
     //LOG_ERROR ("curr_time_in_sec %d, pump_start_time_in_sec %d", curr_time_in_sec, pump_start_time_in_sec);
@@ -228,6 +227,7 @@ int main (
         void)
 {
     signal (SIGINT, exit_function);
+    set_app_priority (PRIORITY_MAX);
 
     // raspberry pi setup
 #ifdef USE_WIRINGPI_LIB
@@ -296,7 +296,7 @@ int main (
         get_soil_moisture_level (&limit);*/
     }
 
+    set_app_priority (PRIORITY_DEFAULT);
     LOG_INFO ("exit app");
-
     return 0;
 }

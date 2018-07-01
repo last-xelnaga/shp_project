@@ -1,6 +1,7 @@
 
 C  = $(PREFIX)gcc
 CC = $(PREFIX)g++
+STRIP = $(PREFIX)strip
 
 CFLAGS   = $(FLAGS) -DDEBUG_TAG="$(TARGET)" -pedantic -Wall -Wextra -std=c99
 CXXFLAGS = $(FLAGS) -DDEBUG_TAG="$(TARGET)" -pedantic -Wall -Wextra -std=c++11
@@ -17,7 +18,7 @@ OBJCPP = $(SRCCPP:%.cpp=$(OBJDIR)/%.o)
 $(OBJDIR)/%.o :%.cpp
 	$(CC) -c $(CXXFLAGS) $(INC) $< -o $@
 
-.PHONY: all clean debug release profile deploy
+.PHONY: all clean debug release strip profile deploy trace
 
 all: debug
 
@@ -28,9 +29,12 @@ debug: CXXFLAGS += -O0 -g3 -ggdb -DDEBUG
 debug: executable
 
 release: clean
-release: CFLAGS += -O2
-release: CXXFLAGS += -O2
-release: executable
+release: CFLAGS += -O2 -fomit-frame-pointer
+release: CXXFLAGS += -O2 -fomit-frame-pointer
+release: strip
+
+strip: executable
+	$(STRIP) --strip-all --verbose $(TARGET)
 
 $(OBJDIR):
 	mkdir -vp $(OBJDIR)
@@ -41,9 +45,11 @@ $(TARGET): $(OBJCPP) $(OBJC)
 clean:
 	rm -rf $(OBJDIR) $(TARGET)
 
-profile: executable
+profile: debug
 	valgrind --leak-check=full --show-leak-kinds=all ./$(TARGET)
 
 deploy: release
-	strip $(TARGET)
 	./deploy.sh
+
+trace: debug
+	gdb ./$(TARGET) run
