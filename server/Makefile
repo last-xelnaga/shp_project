@@ -35,6 +35,6 @@ include $(COMMON)/build/.global_rules
 include $(COMMON)/crypto/.deps
 include $(COMMON)/network/.deps
 include $(COMMON)/utils/.deps
-$(OBJDIR)/fcm_messaging_class.o: base64.h fcm_messaging_class.hpp file_utils.h log.h sha256.h Makefile
-$(OBJDIR)/main.o: log.h server_socket_class.hpp server_worker.hpp Makefile
-$(OBJDIR)/server_worker.o: fcm_messaging_class.hpp log.h server_socket_class.hpp server_worker.hpp Makefile
+$(OBJDIR)/fcm_messaging_class.o: base64.h fcm_messaging_class.hpp file_utils.h log.h sha256.h Makefile $(COMMON)/build/.global_rules
+$(OBJDIR)/main.o: log.h server_socket_class.hpp server_worker.hpp Makefile $(COMMON)/build/.global_rules
+$(OBJDIR)/server_worker.o: fcm_messaging_class.hpp log.h server_socket_class.hpp server_worker.hpp Makefile $(COMMON)/build/.global_rules
