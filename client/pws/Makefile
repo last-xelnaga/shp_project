@@ -7,7 +7,6 @@ TARGET = shp_client
 OBJDIR = $(shell pwd)/obj
 INC    =
 LIB    =
-FLAGS  =
 
 ifeq ($(WIRING_LIB) , yes)
     FLAGS += -DUSE_WIRINGPI_LIB

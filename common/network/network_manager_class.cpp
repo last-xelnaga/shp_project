@@ -2,8 +2,6 @@
 #include "client_socket_class.hpp"
 #include "log.h"
 #include "network_manager_class.hpp"
-//#include "sensor_buzzer.h"
-#include "settings_class.hpp"
 #include "time_utils.h"
 
 #include <pthread.h>
@@ -39,6 +37,14 @@ void* network_manager_class::network_manager_worker (
 
     LOG_INFO ("end of the loop");
     return NULL;
+}
+
+void network_manager_class::set_server_address (
+        std::string server_name,
+        unsigned int i_port_number)
+{
+    m_server_name = server_name;
+    mi_port_number = i_port_number;
 }
 
 void network_manager_class::enqueue_message (
@@ -86,8 +92,7 @@ void network_manager_class::flush (
         }
 
         client_socket_class socket_client;
-        int status = socket_client.open_connection (settings_class::get_value_for ("server_name").c_str (),
-                std::stoi (settings_class::get_value_for ("server_port")));
+        int status = socket_client.open_connection (m_server_name.c_str (), mi_port_number);
         if (status != 0)
         {
             LOG_INFO ("failed to open connection");

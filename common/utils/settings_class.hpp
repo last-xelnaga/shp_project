@@ -22,15 +22,15 @@ class settings_class
                 void);
 
         void init_key (
-                std::string key,
-                std::string value);
+                std::string& key,
+                std::string& value);
 
         std::string get_value (
                 std::string key);
 
     public:
         static std::string get_value_for (
-                std::string key);
+                const char* key);
 
     public:
         settings_class (settings_class const&) = delete;

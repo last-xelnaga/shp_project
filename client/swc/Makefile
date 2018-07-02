@@ -7,7 +7,6 @@ TARGET = shp_client2
 OBJDIR = $(shell pwd)/obj
 INC    =
 LIB    =
-FLAGS  =
 
 ifeq ($(WIRING_LIB) , yes)
     FLAGS += -DUSE_WIRINGPI_LIB
@@ -29,4 +28,4 @@ include $(COMMON)/build/.global_rules
 include $(COMMON)/network/.deps
 include $(COMMON)/sensors/.deps
 include $(COMMON)/utils/.deps
-$(OBJDIR)/main.o: log.h rpi_gpio.h sensor_dht22.h sys_utils.h Makefile
+$(OBJDIR)/main.o: log.h network_manager_class.hpp rpi_gpio.h sensor_dht22.h settings_class.hpp sys_utils.h Makefile

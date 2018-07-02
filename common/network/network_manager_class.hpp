@@ -15,6 +15,9 @@ private:
     volatile char is_worker_active;
     unsigned long server_last_connection_time;
 
+    std::string m_server_name;
+    unsigned int mi_port_number;
+
 private:
     network_manager_class (
             void);
@@ -31,6 +34,10 @@ public:
     }
 
 public:
+    void set_server_address (
+            std::string server_name,
+            unsigned int i_port_number);
+
     void enqueue_message (
             std::string client,
             std::string type,

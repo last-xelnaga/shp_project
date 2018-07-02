@@ -29,22 +29,27 @@
 // eType liquide level sensor, connected to mcp3008 channel 0
 #define SENSOR_LIQUID_LEVEL_MCP_CHANNEL     0
 
-// sensor value for full water tank
+// min sensor value for full water tank
 #define MIN_LIQUID_VALUE                    619
 
-// sensor value for empty water tank
+// max sensor value for empty water tank
 #define MAX_LIQUID_VALUE                    790
 
 // minimum volume that still allows the pamp activation
 #define MIN_WATERING_LEVEL                  2
 
-// eType liquide level sensor, connected to mcp3008 channel 1
+// soil moisture level sensor, connected to mcp3008 channel 1
 #define SENSOR_SOIL_MOISTURE_MCP_CHANNEL    1
 
 
 volatile sig_atomic_t is_going_on = 1;
 
-unsigned long dht_last_check_time;
+static unsigned long pump_start_time_in_sec;
+static unsigned long pump_active_time_in_sec;
+static unsigned long pump_stop_time_in_sec;
+
+static unsigned long data_last_check_time_in_sec;
+static unsigned long data_check_sleep_time_in_sec;
 
 void exit_function (
         int sig)
@@ -58,36 +63,32 @@ void exit_function (
 bool is_time_for_watering (
         void)
 {
+    bool result = false;
+
     time_t now = time (NULL);
     struct tm tm = *localtime (&now);
     unsigned int curr_time_in_sec = tm.tm_hour * 3600 + tm.tm_min * 60 + tm.tm_sec;
-    unsigned int pump_time = std::stoi (settings_class::get_value_for ("pump_start_time"));
-    unsigned int pump_start_time_in_sec = pump_time / 100 * 3600 + pump_time % 100 * 60;
-    unsigned int pump_stop_time_in_sec = pump_start_time_in_sec +
-            std::stoi (settings_class::get_value_for ("pump_active_time")) - 1;
-
-    //LOG_ERROR ("curr_time_in_sec %d, pump_start_time_in_sec %d", curr_time_in_sec, pump_start_time_in_sec);
 
     if (curr_time_in_sec >= pump_start_time_in_sec && curr_time_in_sec <= pump_stop_time_in_sec)
-        return true;
+        result = true;
 
-    return false;
+    return result;
 }
 
-bool is_time_for_temperature (
+bool is_time_for_data (
         void)
 {
+    bool result = false;
+
     time_t now = time (NULL);
 
-    //LOG_ERROR ("dht_last_check_time %d, now %ld", dht_last_check_time, now);
-
-    if (now - dht_last_check_time >= (unsigned long)std::stoi (settings_class::get_value_for ("dht_sleep_time")))
+    if (now - data_last_check_time_in_sec >= data_check_sleep_time_in_sec)
     {
-        dht_last_check_time = now;
-        return true;
+        data_last_check_time_in_sec = now;
+        result = true;
     }
 
-    return false;
+    return result;
 }
 
 
@@ -163,6 +164,8 @@ void do_watering (
     int is_enough_water = 1;
     LOG_INFO ("do_watering");
 
+    buzzer_play_sound (SENSOR_BUZZER_GPIO, BUZZER_SHORT_BEEP);
+
     // get water level before watering
     int level = get_liquid_level ();
     if (level < MIN_WATERING_LEVEL * 10)
@@ -179,7 +182,7 @@ void do_watering (
     #endif // #ifdef USE_WIRINGPI_LIB
 
         // wait enough for the 100 ml
-        sleep (std::stoi (settings_class::get_value_for ("pump_active_time")));
+        sleep (pump_active_time_in_sec);
 
         // stop the pump
     #ifdef USE_WIRINGPI_LIB
@@ -226,8 +229,17 @@ void do_data_check (
 int main (
         void)
 {
+    LOG_INFO ("app start");
     signal (SIGINT, exit_function);
     set_app_priority (PRIORITY_MAX);
+
+    unsigned long pump_start_time = std::stoi (settings_class::get_value_for ("pump_start_time"));
+    pump_start_time_in_sec = pump_start_time / 100 * 3600 + pump_start_time % 100 * 60;
+
+    pump_active_time_in_sec = std::stoi (settings_class::get_value_for ("pump_active_time"));
+    pump_stop_time_in_sec = pump_start_time_in_sec + pump_active_time_in_sec - 1;
+
+    data_check_sleep_time_in_sec = std::stoi (settings_class::get_value_for ("data_check_sleep_time"));
 
     // raspberry pi setup
 #ifdef USE_WIRINGPI_LIB
@@ -264,10 +276,12 @@ int main (
         set_pin_voltage (SENSOR_LED_GPIO, LOW);
     }
 
-    //buzzer_play_sound (SENSOR_BUZZER_GPIO, BUZZER_SHORT_BEEP);
-    //buzzer_play_sound (SENSOR_BUZZER_GPIO, BUZZER_LONG_BEEP);
     buzzer_play_sound (SENSOR_BUZZER_GPIO, BUZZER_TWO_SHORT_BEEPS);
 #endif // ifdef USE_WIRINGPI_LIB
+
+    network_manager_class::get_instance ().set_server_address (
+            settings_class::get_value_for ("server_name"),
+            std::stoi (settings_class::get_value_for ("server_port")));
 
     do_greeting (is_going_on);
     do_data_check ();
@@ -279,21 +293,10 @@ int main (
         if (is_time_for_watering ())
             do_watering ();
 
-        if (is_time_for_temperature ())
+        if (is_time_for_data ())
             do_data_check ();
 
-        //set_pin_voltage (SENSOR_LED_GPIO, HIGH);
         sleep (1);
-        //set_pin_voltage (SENSOR_LED_GPIO, LOW);
-
-        //buzzer_play_sound (SENSOR_BUZZER_GPIO, BUZZER_SHORT_BEEP);
-
-        /*int limit;
-        int status = get_liquid_level (&limit);
-        if (status == 0)
-            LOG_INFO ("liquid level %d.%d %%", limit / 10, limit % 10);
-
-        get_soil_moisture_level (&limit);*/
     }
 
     set_app_priority (PRIORITY_DEFAULT);

@@ -79,8 +79,8 @@ void settings_class::read_config_file (
 }
 
 void settings_class::init_key (
-        std::string key,
-        std::string value)
+        std::string& key,
+        std::string& value)
 {
     for (unsigned int i = 0; i < m_settings.size (); ++ i)
         if (m_settings [i].first == key)
@@ -109,9 +109,9 @@ std::string settings_class::get_value (
 }
 
 std::string settings_class::get_value_for (
-        std::string key)
+        const char* key)
 {
     static settings_class instance;
     instance.read_config_file ();
-    return instance.get_value (key);
+    return instance.get_value (std::string (key));
 }
