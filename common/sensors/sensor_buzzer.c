@@ -1,8 +1,8 @@
 
-#include "sensor_buzzer.h"
-#include "rpi_gpio.h"
-#include "time_utils.h"
 #include "log.h"
+#include "rpi_gpio.h"
+#include "sensor_buzzer.h"
+#include "time_utils.h"
 
 
 void play_sound (

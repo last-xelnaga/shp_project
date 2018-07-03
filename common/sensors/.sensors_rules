@@ -2,11 +2,15 @@
 INC += \
     -I $(COMMON)/sensors
 
+SRCCPP += \
+    sensor_event_class.cpp \
+
+
 SRCC += \
     rpi_gpio.c \
     rpi_spi.c \
     sensor_buzzer.c \
-    sensor_dht22.c
+    sensor_dht22.c \
 
 VPATH += \
     src: $(COMMON)/sensors
