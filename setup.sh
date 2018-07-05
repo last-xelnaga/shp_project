@@ -88,6 +88,25 @@ else
     info "curl already in place, skipping ..."
 fi
 
+# get gtest
+gtest=$external/googletest
+if [ ! -d $gtest ]; then
+    cd $external
+    git clone https://github.com/google/googletest.git
+    if [ "$?" -ne "0" ]; then
+        error "failed to clone gtest"
+    fi
+
+    cd $gtest
+    make -C googletest/make clean
+    make -C googletest/make gtest.a
+    make -C googletest/make gtest_main.a
+
+    cd $root
+else
+    info "gtest already in place, skipping ..."
+fi
+
 
 # check the machine architecture
 tools=$external/tools

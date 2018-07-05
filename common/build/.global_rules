@@ -27,7 +27,7 @@ $(OBJDIR)/%.o :%.cpp
 	@echo -e "$(STDOUTCXX)\n$(STDERRCXX)"
 
 
-.PHONY: all clean debug release profile deploy trace
+.PHONY: all clean debug release profile deploy trace test
 
 all: debug
 
@@ -79,3 +79,6 @@ deploy: release
 
 trace: debug
 	gdb ./$(TARGET) run
+
+test: release
+	./$(TARGET) --gtest_color=true
