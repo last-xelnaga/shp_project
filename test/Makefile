@@ -1,6 +1,6 @@
 
 TARGET = shp_test
-OBJDIR = obj
+OBJDIR = $(shell pwd)/obj
 
 INC    = -I ../external/googletest/googletest/include
 LIB    = -L ../external/googletest/googletest/make -l:gtest.a -l:gtest_main.a -lpthread

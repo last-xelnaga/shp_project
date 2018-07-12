@@ -17,10 +17,10 @@ int read_from_file (
         void** data,
         unsigned int* size);
 
-void drop_file (
+int drop_file (
         const char* file_name);
 
-void drop_old_file (
+int drop_old_file (
         const char* file_name,
         unsigned int exp_time);
 
