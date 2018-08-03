@@ -186,6 +186,7 @@ if [ $arch == "x86_64" ]; then
         info "create makefile.prefix_esp ..."
         cd $root
         echo "PREFIX = $tools_esp32/xtensa-esp32-elf/bin/xtensa-esp32-elf-" > ./client/makefile.prefix_esp
+        echo "IDF_PATH = $tools_esp32/tools_esp/esp-idf" >> ./client/makefile.prefix_esp
         echo "WIRING_LIB := yes" >> ./client/makefile.prefix_esp
         echo
 
