@@ -1,7 +1,8 @@
-pws/obj/
-swc/obj/
 esp/build/
 esp/sdkconfig
+pws/obj/
+swc/obj/
+test/obj/
 makefile.prefix_arm
 makefile.prefix_esp
 shp_client
