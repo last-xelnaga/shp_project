@@ -2,6 +2,7 @@
 #include "log.h"
 #include "network_manager_class.hpp"
 #include "rpi_gpio.h"
+#include "rpi_spi.h"
 #include "sensor_dht22.h"
 #include "settings_class.hpp"
 #include "sys_utils.h"
@@ -14,6 +15,8 @@
 // dht22 temperature and humidity sensor gpio
 #define SENSOR_DHT22_GPIO                   23
 
+// soil moisture level sensor, connected to mcp3008 channel 0
+#define SENSOR_SOIL_MOISTURE_MCP_CHANNEL    0
 
 volatile sig_atomic_t is_going_on = 1;
 
@@ -65,6 +68,10 @@ void do_data_check (
     unsigned int hum; int temp;
 #ifdef USE_WIRINGPI_LIB
     int status = dht22_get_data (SENSOR_DHT22_GPIO, &hum, &temp);
+    if (status == 0)
+    {
+        LOG_INFO ("%d.%d %%    %d.%d C", hum / 10, hum % 10, temp / 10, temp % 10);
+    }
 #else
     int status = 0; hum = 561; temp = 274;
 #endif // ifdef USE_WIRINGPI_LIB
@@ -104,6 +111,15 @@ int main (
             is_going_on = 0;
         }
     }
+
+    if (is_going_on)
+    {
+        if (rpi_spi_init () == -1)
+        {
+            LOG_ERROR ("rpi_gpio_init has failed");
+            is_going_on = 0;
+        }
+    }
 #endif // ifdef USE_WIRINGPI_LIB
 
     network_manager_class::get_instance ().set_server_address (
@@ -118,6 +134,9 @@ int main (
     {
         if (is_time_for_data ())
             do_data_check ();
+
+        int result = rpi_spi_mcp3008_read (SENSOR_SOIL_MOISTURE_MCP_CHANNEL);
+        LOG_INFO ("level %d", result);
 
         sleep (1);
     }

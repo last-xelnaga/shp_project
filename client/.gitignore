@@ -4,4 +4,3 @@ esp/build/
 makefile.prefix_arm
 makefile.prefix_esp
 shp_client
-shp_client2

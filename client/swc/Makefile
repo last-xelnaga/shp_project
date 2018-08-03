@@ -3,7 +3,7 @@ PREFIX =
 
 -include ../makefile.prefix_arm
 
-TARGET = shp_client2
+TARGET = shp_client
 OBJDIR = $(shell pwd)/obj
 INC    =
 LIB    =
