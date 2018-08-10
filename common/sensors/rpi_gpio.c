@@ -5,12 +5,20 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
-#include <sys/mman.h>
 #include <unistd.h>
 
+#ifdef RPI_TARGET
+#include <sys/mman.h>
+#endif // RPI_TARGET
+
+#ifdef ESP_TARGET
+#include <driver/gpio.h>
+#endif // ESP_TARGET
+
+
+#ifdef RPI_TARGET
 // rpi2 range check taken from http://sourceforge.net/p/raspberry-gpio-python/
 // more in "General Purpose I/O (GPIO)"
-
 #define GPIO_BASE_OFFSET        0x200000
 #define GPIO_LENGTH             4096
 
@@ -28,10 +36,13 @@ static int is_valid_rpi (
  
     return result;
 }
+#endif // RPI_TARGET
+
 
 int rpi_gpio_init (
         void)
 {
+#ifdef RPI_TARGET
     if (p_gpio_base != NULL)
         return 0;
 
@@ -83,6 +94,7 @@ int rpi_gpio_init (
         p_gpio_base = NULL;
         return -1;
     }
+#endif // RPI_TARGET
 
     return 0;
 }
@@ -94,17 +106,29 @@ void set_pin_direction (
     switch (direction)
     {
         case INPUT:
+        #ifdef RPI_TARGET
             // set three zeros "000" as an input
             *(p_gpio_base + ((gpio_number) / 10)) &= ~(7 << (((gpio_number) % 10) * 3));
+        #endif // RPI_TARGET
+
+        #ifdef ESP_TARGET
+            gpio_set_direction (gpio_number, GPIO_MODE_INPUT);
+        #endif // ESP_TARGET
+
             break;
 
         case OUTPUT:
+        #ifdef RPI_TARGET
             // check that 'input bits" are emty
             *(p_gpio_base + ((gpio_number) / 10)) &= ~(7 << (((gpio_number) % 10) * 3));
             // set lowest bit to indicate the output
             *(p_gpio_base + ((gpio_number) / 10)) |=  (1 << (((gpio_number) % 10) * 3));
-            break;
-        default:
+        #endif // RPI_TARGET
+
+        #ifdef ESP_TARGET
+            gpio_set_direction (gpio_number, GPIO_MODE_OUTPUT);
+        #endif // ESP_TARGET
+
             break;
     }
 }
@@ -116,10 +140,24 @@ void set_pin_voltage (
     switch (level)
     {
         case LOW:
+        #ifdef RPI_TARGET
             *(p_gpio_base + 10) = 1 << gpio_number;
+        #endif // RPI_TARGET
+
+        #ifdef ESP_TARGET
+            gpio_set_level (gpio_number, level);
+        #endif // ESP_TARGET
+
             break;
         case HIGH:
+        #ifdef RPI_TARGET
             *(p_gpio_base + 7) = 1 << gpio_number;
+        #endif // RPI_TARGET
+
+        #ifdef ESP_TARGET
+            gpio_set_level (gpio_number, level);
+        #endif // ESP_TARGET
+
             break;
         default:
             break;
@@ -129,5 +167,11 @@ void set_pin_voltage (
 unsigned int get_bus_state (
         const int gpio_number)
 {
+#ifdef RPI_TARGET
     return *(p_gpio_base + 13) & (1 << gpio_number);
+#endif // RPI_TARGET
+
+#ifdef ESP_TARGET
+    return gpio_get_level (gpio_number);
+#endif // ESP_TARGET
 }

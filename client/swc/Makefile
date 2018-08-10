@@ -8,8 +8,8 @@ OBJDIR = $(shell pwd)/obj
 INC    =
 LIB    =
 
-ifeq ($(WIRING_LIB) , yes)
-    FLAGS += -DUSE_WIRINGPI_LIB
+ifeq ($(RPI_TARGET), yes)
+    FLAGS += -DRPI_TARGET
 endif
 
 SRCCPP = main.cpp

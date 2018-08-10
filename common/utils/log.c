@@ -1,9 +1,14 @@
 
 #include "log.h"
 
+
+//#ifdef ESP_TARGET
+//#include "esp_log.h"
+//#else
 #include <stdio.h>
 #include <stdarg.h>
 #include <time.h>
+//#endif // ESP_TARGET
 
 #define MAX_LOG_MSG_SIZE            1024
 

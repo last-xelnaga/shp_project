@@ -1,4 +1,4 @@
-esp/build/
+esp/obj/
 esp/sdkconfig
 pws/obj/
 swc/obj/

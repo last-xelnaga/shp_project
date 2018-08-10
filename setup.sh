@@ -148,8 +148,8 @@ if [ $arch == "x86_64" ]; then
 
         info "create makefile.prefix_arm ..."
         cd $root
-        echo "PREFIX = $tools_arm/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin/arm-linux-gnueabihf-" > ./client/makefile.prefix_arm
-        echo "WIRING_LIB := yes" >> ./client/makefile.prefix_arm
+        echo "PREFIX=$tools_arm/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin/arm-linux-gnueabihf-" > ./client/makefile.prefix_arm
+        echo "RPI_TARGET=yes" >> ./client/makefile.prefix_arm
         echo
 
 
@@ -185,14 +185,13 @@ if [ $arch == "x86_64" ]; then
 
         info "create makefile.prefix_esp ..."
         cd $root
-        echo "PREFIX = $tools_esp32/xtensa-esp32-elf/bin/xtensa-esp32-elf-" > ./client/makefile.prefix_esp
-        echo "IDF_PATH = $tools_esp32/tools_esp/esp-idf" >> ./client/makefile.prefix_esp
-        echo "WIRING_LIB := yes" >> ./client/makefile.prefix_esp
+        echo "PREFIX=$tools_esp32/xtensa-esp32-elf/bin/xtensa-esp32-elf-" > ./client/makefile.prefix_esp
+        echo "IDF_PATH=$tools_esp32/tools_esp/esp-idf" >> ./client/makefile.prefix_esp
         echo
 
     else
-        echo "PREFIX = " > ./client/makefile.prefix_arm
-        echo "PREFIX = " > ./client/makefile.prefix_esp
+        echo "PREFIX=" > ./client/makefile.prefix_arm
+        echo "PREFIX=" > ./client/makefile.prefix_esp
     fi
 fi
 echo

@@ -3,10 +3,13 @@
 
 #include <stdio.h>
 #include <fcntl.h>
-#include <sys/mman.h>
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
+
+#ifdef RPI_TARGET
+#include <sys/mman.h>
+#endif // RPI_TARGET
 
 
 /*! This means pin HIGH, true, 3.3volts on a pin. */
@@ -27,6 +30,7 @@
 unsigned int* bcm2835_spi0;
 unsigned int* bcm2835_gpio;
 
+#ifdef RPI_TARGET
 void bcm2835_init (
         void)
 {
@@ -47,6 +51,7 @@ void bcm2835_init (
     bcm2835_spi0 = bcm2835_peripherals + BCM2835_SPI0_BASE / 4;
     bcm2835_gpio = bcm2835_peripherals + BCM2835_GPIO_BASE / 4;
 }
+#endif // RPI_TARGET
 
 /* Write with memory barriers to peripheral
  */
@@ -194,12 +199,14 @@ void bcm2835_spi_setChipSelectPolarity(unsigned char cs, unsigned char active)
 int rpi_spi_init (
         void)
 {
+#ifdef RPI_TARGET
     bcm2835_init ();
     bcm2835_spi_begin ();
     bcm2835_spi_setDataMode (BCM2835_SPI_MODE0); //Data comes in on falling edge
     bcm2835_spi_setClockDivider (BCM2835_SPI_CLOCK_DIVIDER_256); //250MHz / 256 = 976.5kHz
     bcm2835_spi_chipSelect (BCM2835_SPI_CS0); //Slave Select on CS0
     bcm2835_spi_setChipSelectPolarity (BCM2835_SPI_CS0, LOW);
+#endif // RPI_TARGET
 
     return 0;
 }
