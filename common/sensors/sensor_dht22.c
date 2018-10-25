@@ -128,10 +128,6 @@ static int is_data_crc_valid (
     if (crc != p_data [4])
         result = 0;
 
-    LOG_INFO ("0x%02x 0x%02x 0x%02x 0x%02x 0x%02x, crc %s",
-            p_data [0], p_data [1], p_data [2], p_data [3], p_data [4],
-            result == 1 ? "OK" : "FAILED");
-
     return result;
 }
 
@@ -147,7 +143,8 @@ int dht22_get_data (
     read_data (gpio_num);
     if (!is_data_crc_valid ())
     {
-        LOG_ERROR ("dht22 data crc failed");
+        LOG_ERROR ("0x%02x 0x%02x 0x%02x 0x%02x 0x%02x, crc FAILED",
+                p_data [0], p_data [1], p_data [2], p_data [3], p_data [4]);
         return -1;
     }
 
