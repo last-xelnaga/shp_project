@@ -6,13 +6,15 @@
 extern "C" {
 #endif
 
-
 //
 void sleep_milliseconds (
         const unsigned int millis);
 
 const char* get_time_str (
         void);
+
+void set_curr_time (
+        const unsigned long now);
 
 #ifdef __cplusplus
 }

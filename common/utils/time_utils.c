@@ -5,21 +5,32 @@
 #include <sys/time.h>
 #include <time.h>
 
+#ifdef ESP_TARGET
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#endif // ESP_TARGET
+
 
 //TODO migrate to clock_nanosleep
 void sleep_milliseconds (
         const unsigned int millis)
 {
-    struct timeval tv ;
-    gettimeofday (&tv, 0) ;
+#ifdef RPI_TARGET
+    struct timeval tv;
+    gettimeofday (&tv, NULL);
     unsigned long need  = (unsigned long)tv.tv_sec * (unsigned long)1000 + (unsigned long)(tv.tv_usec / 1000) + millis;
 
     unsigned long now;
     do
     {
-        gettimeofday (&tv, 0) ;
+        gettimeofday (&tv, NULL);
         now  = (unsigned long)tv.tv_sec * (unsigned long)1000 + (unsigned long)(tv.tv_usec / 1000);
     } while (now < need);
+#endif // RPI_TARGET
+
+#ifdef ESP_TARGET
+    vTaskDelay (millis / portTICK_PERIOD_MS);
+#endif // ESP_TARGET
 }
 
 const char* get_time_str (
@@ -44,4 +55,22 @@ const char* get_time_str (
         tm->tm_min,
         tm->tm_sec);
     return result;
+}
+
+void set_curr_time (
+        const unsigned long now)
+{
+    struct timeval tv;
+    tv.tv_sec = now;
+    tv.tv_usec = 0;
+
+    struct timezone tz;
+    tz.tz_minuteswest = 120; // GMT+2
+    tz.tz_dsttime = 0;
+
+    int result = settimeofday (&tv, &tz);
+    if (result != 0)
+    {
+        printf("settimeofday() successful.\n");
+    }
 }
