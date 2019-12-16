@@ -1,6 +1,7 @@
 
 #include "file_utils.h"
 #include <gtest/gtest.h>
+using ::testing::InitGoogleTest;
 
 #define TEST_FILE       "test_file"
 
@@ -75,7 +76,7 @@ TEST (file_utils, read_from_file_positive)
     int result = read_from_file (TEST_FILE, &data, &size);
     free (data);
     ASSERT_EQ (result, 0);
-    ASSERT_EQ (size, 4);
+    ASSERT_EQ (size, (unsigned int)4);
 
     // after that delete it
     unlink (TEST_FILE);
@@ -264,4 +265,13 @@ TEST (file_utils, does_file_exist_ivalid_param_01)
     // negative
     int result = does_file_exist (NULL);
     ASSERT_EQ (result, 0);
+}
+
+
+int main (
+        int argc,
+        char **argv)
+{
+    InitGoogleTest (&argc, argv);
+    return RUN_ALL_TESTS ();
 }

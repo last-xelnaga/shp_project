@@ -46,14 +46,14 @@ int fcm_messaging_class::parse_service_account_json (
     if (result == 0)
     {
         json::value email = obj ["client_email"];
-        m_email = stringify (email, json::ESCAPE_UNICODE);
+        m_email = stringify (email, json::EscapeUnicode);
     }
 
     // extract the private key
     if (result == 0)
     {
         json::value key = obj ["private_key"];
-        m_pem_private_key = stringify (key, json::ESCAPE_UNICODE);
+        m_pem_private_key = stringify (key, json::EscapeUnicode);
 
         // get the first occurrence of endl
         size_t pos = m_pem_private_key.find ("\\n");

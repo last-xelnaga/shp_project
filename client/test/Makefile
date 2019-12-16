@@ -8,9 +8,11 @@ OBJDIR = $(shell pwd)/obj
 INC    =
 LIB    =
 
-ifeq ($(RPI_TARGET), yes)
-    FLAGS += -DRPI_TARGET
-endif
+FLAGS  = -DRPI_TARGET
+
+#ifeq ($(RPI_TARGET), yes)
+#    FLAGS += -DRPI_TARGET
+#endif
 
 SRCCPP = main.cpp
 

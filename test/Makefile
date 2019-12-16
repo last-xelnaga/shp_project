@@ -3,7 +3,9 @@ TARGET = shp_test
 OBJDIR = $(shell pwd)/obj
 
 INC    = -I ../external/googletest/googletest/include
-LIB    = -L ../external/googletest/googletest/make -l:gtest.a -l:gtest_main.a -lpthread
+LIB    = -L ../external/googletest/bazel-bin -l:libgtest.a -l:libgtest_main.a -lpthread
+FLAGS  = -DLINUX_TARGET
+
 
 SRCCPP = \
     file_utils_test.cpp \

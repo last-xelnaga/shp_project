@@ -1,12 +1,20 @@
 
 TARGET = shp_server
 OBJDIR = $(shell pwd)/obj
-FLAGS  = 
-INC    = -I.
-LIB    =
+
+-include ../makefile.prefix_arm
+#-include ../makefile.prefix_linux
+
+
+ifeq ($(RPI_TARGET), yes)
+    FLAGS += -DRPI_TARGET
+	LIB +=  -lrt
+endif
+
+#FLAGS  = -DLINUX_TARGET
 
 # add cpp-json support
-INC   += -I./../external/cpp-json/include
+INC   += -I./../external/cpp-json/lib/include
 
 # add static curl
 INC   += -I../external/curl-7.54.0/install/include

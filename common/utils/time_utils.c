@@ -2,10 +2,21 @@
 #include "time_utils.h"
 
 #include <stdio.h>
-#include <sys/time.h>
 #include <time.h>
 
+#ifdef RPI_TARGET
+//#include <sys/time.h>
+#include <linux/time.h>
+#endif // RPI_TARGET
+
+#ifdef LINUX_TARGET
+#undef __USE_MISC
+#define __USE_MISC
+#include <sys/time.h>
+#endif // LINUX_TARGET
+
 #ifdef ESP_TARGET
+#include <sys/time.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #endif // ESP_TARGET
@@ -15,7 +26,7 @@
 void sleep_milliseconds (
         const unsigned int millis)
 {
-#ifdef RPI_TARGET
+#if defined RPI_TARGET || defined LINUX_TARGET
     struct timeval tv;
     gettimeofday (&tv, NULL);
     unsigned long need  = (unsigned long)tv.tv_sec * (unsigned long)1000 + (unsigned long)(tv.tv_usec / 1000) + millis;
@@ -26,7 +37,7 @@ void sleep_milliseconds (
         gettimeofday (&tv, NULL);
         now  = (unsigned long)tv.tv_sec * (unsigned long)1000 + (unsigned long)(tv.tv_usec / 1000);
     } while (now < need);
-#endif // RPI_TARGET
+#endif // RPI_TARGET || LINUX_TARGET
 
 #ifdef ESP_TARGET
     vTaskDelay (millis / portTICK_PERIOD_MS);

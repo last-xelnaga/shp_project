@@ -52,10 +52,10 @@ int process_message (
     auto json = json::parse (buffer);
     json::value client = json ["client"];
     json::value type = json ["type"];
-    std::string type_str = stringify (type, json::ESCAPE_UNICODE);
+    std::string type_str = stringify (type, json::EscapeUnicode);
 
     json::value status_str = json ["data"]["status"];
-    int status = to_number (status_str);
+    int status = json::to_number<int>(status_str);
 
     LOG_INFO ("new %s message", type_str.c_str ());
 
@@ -65,10 +65,10 @@ int process_message (
         if (status)
         {
             json::value temp = json ["data"]["temp"];
-            int temperature = to_number (temp);
+            int temperature = json::to_number<int>(temp);
 
             json::value hum = json ["data"]["hum"];
-            int humidity = to_number (hum);
+            int humidity = json::to_number<int>(hum);
 
             pws_client_data.temp__latest_value = temperature;
             pws_client_data.hum__latest_value = humidity;
@@ -89,17 +89,17 @@ int process_message (
         if (status)
         {
             json::value limit = json ["data"]["level"];
-            pws_client_data.watering__water_level = to_number (limit);
+            pws_client_data.watering__water_level = json::to_number<int>(limit);
 
             pws_client_data.watering__latest_time = time (NULL);
             pws_client_data.watering__errors_streak = 0;
-            fcm_message_body = "watering successful at\n" + to_string (json ["evt_time"]);
+            fcm_message_body = "watering successful at\n" + json::to_string (json ["evt_time"]);
         }
         else
         {
             pws_client_data.watering__errors_streak ++;
             pws_client_data.watering__errors_overall ++;
-            fcm_message_body = "failed to do a watering at\n" + to_string (json ["evt_time"]);
+            fcm_message_body = "failed to do a watering at\n" + json::to_string (json ["evt_time"]);
         }
 
         fcm_messaging_class::get_instance ().register_message ("SHP", fcm_message_body.c_str ());

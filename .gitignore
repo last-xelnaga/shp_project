@@ -1,1 +1,4 @@
 external/
+makefile.prefix_arm
+makefile.prefix_esp
+makefile.prefix_linux
