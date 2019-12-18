@@ -1,5 +1,5 @@
 
-include ../makefile.prefix_esp
+include ../../makefile.prefix_esp
 
 PROJECT_NAME   = esp_test
 ROOT_DIR       = $(shell pwd)
