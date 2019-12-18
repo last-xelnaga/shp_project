@@ -101,22 +101,23 @@ if [ $arch == "x86_64" ]; then
 
         # tools for esp32
         tools_esp32=$external/tools_esp
+        esp32_version=xtensa-esp-elf-gcc8_2_0-esp32-2019r2-linux-amd64.tar.gz
 
         # get cross-compile tools
         if [ ! -d $tools_esp32 ]; then
             cd $external
 
-            wget -c https://dl.espressif.com/dl/xtensa-esp32-elf-linux64-1.22.0-80-g6c4433a-5.2.0.tar.gz
+            wget -c https://dl.espressif.com/dl/$esp32_version
             if [ "$?" -ne "0" ]; then
                 error "failed to download esp tools"
             fi
 
             mkdir -p $tools_esp32
             cd $tools_esp32
-            tar -xzvf $external/xtensa-esp32-elf-linux64-1.22.0-80-g6c4433a-5.2.0.tar.gz
+            tar -xvf $external/$esp32_version
 
             cd $external
-            rm xtensa-esp32-elf-linux64-1.22.0-80-g6c4433a-5.2.0.tar.gz
+            rm $esp32_version
 
             cd $tools_esp32
             info "clone esp idf ..."
