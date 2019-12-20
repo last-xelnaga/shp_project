@@ -59,8 +59,8 @@ static void gpio_task_worker (
             res = dht22_get_data (DHT_PIN, &humidity, &temperature);
         }
 
-        LOG_INFO ("hum %d.%d %%, temp %d.%d C", humidity / 10, humidity % 10,
-                temperature / 10, temperature % 10);
+        //LOG_INFO ("hum %d.%d %%, temp %d.%d C", humidity / 10, humidity % 10,
+        //        temperature / 10, temperature % 10);
 
         int soil_moisture_level = get_soil_moisture_level ();
         int liquid_level = get_liquid_level ();
@@ -100,7 +100,7 @@ int get_soil_moisture_level (
     result = (result - MOISTURE_VALUE_MIN) * 1000 / (MOISTURE_VALUE_MAX - MOISTURE_VALUE_MIN);
     result = 1000 - result;
 
-    LOG_INFO ("soil_moisture_level %d,%d %%, (%d)", result / 10, result % 10, result_raw);
+    //LOG_INFO ("soil_moisture_level %d,%d %%, (%d)", result / 10, result % 10, result_raw);
     return result;
 }
 
@@ -123,7 +123,7 @@ int get_liquid_level (
     result = (result - WATER_LEVEL_MIN) * 1000 / (WATER_LEVEL_MAX - WATER_LEVEL_MIN);
     result = 1000 - result;
 
-    LOG_INFO ("liquid_level %d,%d %%, (%d)", result / 10, result % 10, result_raw);
+    //LOG_INFO ("liquid_level %d,%d %%, (%d)", result / 10, result % 10, result_raw);
     return result;
 }
 

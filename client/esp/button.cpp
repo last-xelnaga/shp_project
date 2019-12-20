@@ -39,7 +39,7 @@ static void gpio_task_worker (
         if (button_pressed)
         {
             int liquid_level = get_liquid_level ();
-            LOG_INFO ("fuiling start. level %d,%d %%", liquid_level / 10, liquid_level % 10);
+            LOG_INFO ("fueling start. level %d,%d %%", liquid_level / 10, liquid_level % 10);
 
             bool toggle = true;
 
@@ -77,7 +77,7 @@ static void gpio_task_worker (
             }
 
             liquid_level = get_liquid_level ();
-            LOG_INFO ("fuiling finished. level %d,%d %%", liquid_level / 10, liquid_level % 10);
+            LOG_INFO ("fueling finished. level %d,%d %%", liquid_level / 10, liquid_level % 10);
 
             if (p_callback != NULL)
             {
