@@ -101,7 +101,7 @@ if [ $arch == "x86_64" ]; then
 
         # tools for esp32
         tools_esp32=$external/tools_esp
-        esp32_version=xtensa-esp-elf-gcc8_2_0-esp32-2019r2-linux-amd64.tar.gz
+        esp32_version=xtensa-esp32-elf-gcc8_2_0-esp-2019r2-linux-amd64.tar.gz
 
         # get cross-compile tools
         if [ ! -d $tools_esp32 ]; then
