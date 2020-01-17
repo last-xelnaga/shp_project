@@ -1,5 +1,6 @@
 esp/obj/
 esp/sdkconfig
+esp/wifi_data.h
 pws/obj/
 swc/obj/
 test/obj/

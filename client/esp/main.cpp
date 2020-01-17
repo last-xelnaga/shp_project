@@ -9,6 +9,7 @@ extern "C"
 #include "esp_log.h"
 #include "nvs_flash.h"
 
+#include "wifi_data.h"
 #include "defines.hpp"
 #include "time_utils.h"
 
@@ -104,8 +105,8 @@ void wifi_init_sta (
 
     wifi_config_t wifi_config;
     bzero (&wifi_config, sizeof (wifi_config_t));
-    strcpy ((char*)wifi_config.sta.ssid, "sony");
-    strcpy ((char*)wifi_config.sta.password, "hujvamvrot");
+    strcpy ((char*)wifi_config.sta.ssid, WIFI_SSID);
+    strcpy ((char*)wifi_config.sta.password, WIFI_PASSWORD);
     ESP_ERROR_CHECK (esp_wifi_set_config (ESP_IF_WIFI_STA, &wifi_config));
 
     ESP_ERROR_CHECK (esp_event_handler_register (WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL));
